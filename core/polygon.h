@@ -3,6 +3,18 @@
 #include <atomic>
 #include <vector>
 
+/**
+ * 
+ * 
+ * @brief 在创建polygon 的时候，注意：
+ * 1. 若存在多个点通用的x 或者 y 且都在polygon的extreme points 中
+ * 这样会造成之后的分解工作的效果较差。
+ * 
+ * 
+ * 
+*/
+
+
 namespace polygon{
 
 template<class T>

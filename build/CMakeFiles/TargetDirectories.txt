@@ -1,4 +1,0 @@
-/home/lut/Desktop/Polygon/build/CMakeFiles/rebuild_cache.dir
-/home/lut/Desktop/Polygon/build/CMakeFiles/edit_cache.dir
-/home/lut/Desktop/Polygon/build/CMakeFiles/test_createpolygon.dir
-/home/lut/Desktop/Polygon/build/CMakeFiles/testQuad.dir

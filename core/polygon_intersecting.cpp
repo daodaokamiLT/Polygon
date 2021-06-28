@@ -93,7 +93,7 @@ namespace polygon{
         size_t minx0_index, maxx0_index, miny0_index, maxy0_index;
         std::vector<point2d_t<T>*> expoints_first;
         polygon_firstptr_->GetExtremePoints(expoints_first); 
-        size_t start_idx = 0, end_idx = expoints_first.size()-1;// 永远在数值上都是差一步的距离 start_idx - 1 = end_idx
+        size_t start_idx = 0, end_idx = expoints_first.size()-1, endthreshold = expoints_first.size();// 永远在数值上都是差一步的距离 start_idx - 1 = end_idx
         // is unclockwise to visited these points
         bool isclockwise = false;
         int firstDiff_Index = 0;
@@ -121,7 +121,7 @@ namespace polygon{
             firstDiff_Index = 1;
         }
         ++firstDiff_Index;
-        if(firstDiff_Index == expoints_first.size()){
+        if(firstDiff_Index == endthreshold){
             // the polygon is just a line with a out point. at the end of the expoints.
             for(int i=0; i<firstDiff_Index-1; ++i){
                 if(isclockwise){ // like | .
@@ -143,7 +143,7 @@ namespace polygon{
             }
         }
         // 定理： 一个循环有序队列中，最大值和最小值的index 不可能都在端点, 除非一条直线的情况加一个点的情况
-        for(int i=firstDiff_Index; i<expoints_first.size(); ++i){//must can be find minest or maxest x points, but should 
+        for(int i=firstDiff_Index; i<endthreshold; ++i){//must can be find minest or maxest x points, but should 
             if(isclockwise){
                 printf("run in here 0.\n");
                 if(expoints_first[i]->x < expoints_first[i-1]->x){
@@ -153,13 +153,13 @@ namespace polygon{
                     maxx0_expoint = expoints_first[maxx0_index];
                     int count = maxx0_index;
                     int next_count = count+1;
-                    if(next_count == expoints_first.size()) next_count = 0;
-                    while(expoints_first[next_count]->x < expoints_first[count]->x){
+                    if(next_count == endthreshold) next_count = 0;
+                    while(expoints_first[next_count]->x <= expoints_first[count]->x){
                         leftfirst_monochain_.points_chain.emplace_back(expoints_first[count]);
                         ++count;
-                        if(count == expoints_first.size()) count = 0;
+                        if(count == endthreshold) count = 0;
                         next_count = count + 1;
-                        if(next_count == expoints_first.size()) next_count = 0;
+                        if(next_count == endthreshold) next_count = 0;
                     }
                     // 把min 也放进来
                     leftfirst_monochain_.points_chain.emplace_back(expoints_first[count]);
@@ -171,7 +171,7 @@ namespace polygon{
                     while(count != next_count){
                         rightfirst_monochain_.points_chain.emplace_back(expoints_first[count]);
                         ++count;
-                        if(count == expoints_first.size()) count = 0;
+                        if(count == endthreshold) count = 0;
                     }
                     rightfirst_monochain_.points_chain.emplace_back(expoints_first[count]);
                     break;
@@ -184,13 +184,13 @@ namespace polygon{
                     minx0_expoint = expoints_first[minx0_index];
                     int count = minx0_index;
                     int next_count = count + 1;
-                    if(next_count == expoints_first.size()) next_count = 0;
-                    while(expoints_first[next_count]->x > expoints_first[count]->x){
+                    if(next_count == endthreshold) next_count = 0;
+                    while(expoints_first[next_count]->x >= expoints_first[count]->x){
                         rightfirst_monochain_.points_chain.emplace_back(expoints_first[count]);
                         ++count;
-                        if(count == expoints_first.size()) count = 0;
+                        if(count == endthreshold) count = 0;
                         next_count = count + 1;
-                        if(next_count == expoints_first.size()) next_count = 0;
+                        if(next_count == endthreshold) next_count = 0;
                     }
                     rightfirst_monochain_.points_chain.emplace_back(expoints_first[count]);
                     leftfirst_monochain_.points_chain.emplace_back(expoints_first[count]);
@@ -200,13 +200,19 @@ namespace polygon{
                     while(count != next_count){
                         leftfirst_monochain_.points_chain.emplace_back(expoints_first[count]);
                         ++count;
-                        if(count == expoints_first.size()) count = 0;
+                        if(count == endthreshold) count = 0;
                     }
                     leftfirst_monochain_.points_chain.emplace_back(expoints_first[count]);
                     break;
                 }
             }
         }
+
+        // resplit for y
+        isclockwise = false;
+
+
+
 
         printf("polygon extreme points size is %d, leftchain size is %d, rightchain size is %d.\n", (int)polygon_firstptr_->SizeOfExtremePoints(), (int)leftfirst_monochain_.points_chain.size(), (int)rightfirst_monochain_.points_chain.size());
     }

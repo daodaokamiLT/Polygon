@@ -182,42 +182,47 @@ namespace polygon{
                 count_miny = 0;
             }else if(min_y == dy){
                 ++count_miny;
-            }
-
-            bool mayresort = false;
-            if(minx_idx == miny_idx){// the leftbotton
-                selected_id = minx_idx;
-            }
-            else if(maxx_idx == maxy_idx){// the righttop
-                selected_id = maxx_idx;
-            }
-            else if(minx_idx == maxy_idx){// the lefttop
-                selected_id = minx_idx;
-            }
-            else if(maxx_idx == miny_idx){// the rightbottom
-                selected_id = maxx_idx;
-            }
-            else{
-                // if all this point cannot check a extreme point, just select a point a these four result.
-                // select a count size is miniest element as extreme point
-
-                std::array<std::pair<unsigned long long, T>, 4> extremepoints;
-                extremepoints[0] = std::make_pair(count_maxx, maxx_idx);
-                extremepoints[1] = std::make_pair(count_minx, minx_idx);
-                extremepoints[1] = std::make_pair(count_maxy, maxy_idx);
-                extremepoints[2] = std::make_pair(count_miny, miny_idx);
-                std::sort(extremepoints.begin(), extremepoints.end(), compare_extreme_first<unsigned long long, T>);
-                selected_id = extremepoints[0].second;
-                if(extremepoints[0].first > 1){
-                    mayresort = true;
-                }
-            }
-            // just for test
-            pminx_ = points_[minx_idx];
-            pmaxx_ = points_[maxx_idx];
-            pminy_ = points_[miny_idx];
-            pmaxy_ = points_[maxy_idx];
+            }   
         }
+        bool mayresort = false;
+        if (minx_idx == miny_idx)
+        { // the leftbotton
+            selected_id = minx_idx;
+        }
+        else if (maxx_idx == maxy_idx)
+        { // the righttop
+            selected_id = maxx_idx;
+        }
+        else if (minx_idx == maxy_idx)
+        { // the lefttop
+            selected_id = minx_idx;
+        }
+        else if (maxx_idx == miny_idx)
+        { // the rightbottom
+            selected_id = maxx_idx;
+        }
+        else
+        {
+            // if all this point cannot check a extreme point, just select a point a these four result.
+            // select a count size is miniest element as extreme point
+
+            std::array<std::pair<unsigned long long, T>, 4> extremepoints;
+            extremepoints[0] = std::make_pair(count_maxx, maxx_idx);
+            extremepoints[1] = std::make_pair(count_minx, minx_idx);
+            extremepoints[1] = std::make_pair(count_maxy, maxy_idx);
+            extremepoints[2] = std::make_pair(count_miny, miny_idx);
+            std::sort(extremepoints.begin(), extremepoints.end(), compare_extreme_first<unsigned long long, T>);
+            selected_id = extremepoints[0].second;
+            if (extremepoints[0].first > 1)
+            {
+                mayresort = true;
+            }
+        }
+        // just for test
+        pminx_ = points_[minx_idx];
+        pmaxx_ = points_[maxx_idx];
+        pminy_ = points_[miny_idx];
+        pmaxy_ = points_[maxy_idx];
         // now the result is a starpolygon.
         printf("selected element points is selected_id %lld, position is (%lf, %lf).\n", selected_id, (double)points_[selected_id]->x, (double)points_[selected_id]->y);
         

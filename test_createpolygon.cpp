@@ -102,7 +102,7 @@ int main(int argc, char* argv[]){
         cv::waitKey(30);
     }
     
-    cv::imshow("imgcy", img_cy);
+    // cv::imshow("imgcy", img_cy);
     polygon.CreateExtremeEdges();
     polygon1.CreateExtremeEdges();
     std::vector<polygon::extreme_edge_t<double>> exedges;

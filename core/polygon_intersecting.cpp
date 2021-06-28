@@ -109,7 +109,6 @@ namespace polygon{
              * 
             */
             // decide min or max, 逆时针方向下，找到第一个x不一样的结果
-            
             bool issmallerorbigger = isSmallerorBiggerXLock(polygon_firstptr_, isclockwise, 0, firstDiff_Index);
             if(issmallerorbigger){// 0 is same as ----- 0
                 isclockwise = false;
@@ -147,10 +146,10 @@ namespace polygon{
         for(int i=firstDiff_Index; i<expoints_first.size(); ++i){//must can be find minest or maxest x points, but should 
             if(isclockwise){
                 printf("run in here 0.\n");
-                if(expoints_first[i] < expoints_first[i-1]){
+                if(expoints_first[i]->x < expoints_first[i-1]->x){
                     // 当出现第一个小于的值时，找到最大值。接下来，将所当前最大值和之后所有递减的push into leftfirst_monochain
-                    printf("run in here 1 max is %d.\n", maxx0_index);
                     maxx0_index = i-1;
+                    printf("run in here 1 max is %d.\n", (int)maxx0_index);
                     maxx0_expoint = expoints_first[maxx0_index];
                     int count = maxx0_index;
                     int next_count = count+1;
@@ -163,9 +162,10 @@ namespace polygon{
                         if(next_count == expoints_first.size()) next_count = 0;
                     }
                     // 把min 也放进来
+                    leftfirst_monochain_.points_chain.emplace_back(expoints_first[count]);
                     rightfirst_monochain_.points_chain.emplace_back(expoints_first[count]);
-                    printf("run in here2 min is %d.\n", minx0_index);
                     minx0_index = next_count;
+                    printf("run in here2 min is %d.\n", (int)minx0_index);
                     minx0_expoint = expoints_first[minx0_index];
                     count = minx0_index; next_count = maxx0_index;
                     while(count != next_count){
@@ -173,11 +173,12 @@ namespace polygon{
                         ++count;
                         if(count == expoints_first.size()) count = 0;
                     }
+                    rightfirst_monochain_.points_chain.emplace_back(expoints_first[count]);
                     break;
                 }
             }
             else{
-                if(expoints_first[i] > expoints_first[i-1]){
+                if(expoints_first[i]->x > expoints_first[i-1]->x){
                     // 找到最小值，接下来，把所有当前最小值之后递增的pushinto rightfirst_monochain
                     minx0_index = i-1;
                     minx0_expoint = expoints_first[minx0_index];
@@ -191,7 +192,7 @@ namespace polygon{
                         next_count = count + 1;
                         if(next_count == expoints_first.size()) next_count = 0;
                     }
-
+                    rightfirst_monochain_.points_chain.emplace_back(expoints_first[count]);
                     leftfirst_monochain_.points_chain.emplace_back(expoints_first[count]);
                     maxx0_index = next_count;
                     maxx0_expoint = expoints_first[maxx0_index];
@@ -201,6 +202,7 @@ namespace polygon{
                         ++count;
                         if(count == expoints_first.size()) count = 0;
                     }
+                    leftfirst_monochain_.points_chain.emplace_back(expoints_first[count]);
                     break;
                 }
             }

@@ -31,6 +31,12 @@ struct point2d_t{
         id = idcounterP;
         ++idcounterP;
     }
+    bool Equal(point2d_t<T>* p){
+        if(this->x == p->x && this->y == p->y)
+            return true;
+        else
+            return false;
+    }
     private:   
         static std::atomic_ullong idcounterP;
 };
@@ -79,6 +85,7 @@ public:
     // add ymax same y
     void AddNodeForYmaxsameY(point2d_t<T>* p);
 
+    void AddNodeAny(point2d_t<T>* p);
     const point2d_t<T>* GetMinX_y();
     const point2d_t<T>* GetMaxX_y();
     const point2d_t<T>* GetMinY_x();

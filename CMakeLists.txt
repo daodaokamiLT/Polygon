@@ -11,3 +11,6 @@ include_directories(${OpenCV_INCLUDE_DIRS}
 
 add_executable(test_createpolygon test_createpolygon.cpp)
 target_link_libraries(test_createpolygon ${OpenCV_LIBS})
+
+add_executable(test_cornercase test_cornercase.cpp)
+target_link_libraries(test_cornercase ${OpenCV_LIBS})

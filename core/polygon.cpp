@@ -6,6 +6,10 @@
 #include <algorithm>
 #include <stack>
 #include <iostream>
+#include <limits>
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
 namespace polygon{
 
 
@@ -53,6 +57,11 @@ namespace polygon{
             points_.emplace_back(p);
             // printf("after points size is %d.\n", points_.size());
         }
+    }
+
+    template <class T>
+    void Polygon<T>::AddNodeAny(point2d_t<T>* p){
+        points_.emplace_back(p);
     }
 
     template<class T>
@@ -139,13 +148,13 @@ namespace polygon{
 
     template<class T>
     void Polygon<T>::SorttoStarPolygon(){
-        double max_x = -1*__DBL_MAX__, min_x = __DBL_MAX__, min_y = __DBL_MAX__, max_y = -1 * __DBL_MAX__;
-        unsigned long long maxx_idx, minx_idx, miny_idx, maxy_idx;
+        T max_x = std::numeric_limits<T>::min(), min_x = std::numeric_limits<T>::max(), min_y = std::numeric_limits<T>::max(), max_y = std::numeric_limits<T>::min();
+        unsigned long long maxx_idx=0, minx_idx=0, miny_idx=0, maxy_idx=0;
         unsigned long long count_minx = 0, count_maxx = 0, count_miny = 0, count_maxy = 0;
         unsigned long long selected_id = 0;
         for(int i=0; i<points_.size(); ++i){
-            double dx = (double)points_[i]->x;
-            double dy = (double)points_[i]->y;
+            T dx = points_[i]->x;
+            T dy = points_[i]->y;
             if(max_x < dx){
                 max_x = dx;
                 maxx_idx = i;
@@ -191,12 +200,13 @@ namespace polygon{
             else{
                 // if all this point cannot check a extreme point, just select a point a these four result.
                 // select a count size is miniest element as extreme point
-                std::array<std::pair<unsigned long long, double>, 4> extremepoints;
+
+                std::array<std::pair<unsigned long long, T>, 4> extremepoints;
                 extremepoints[0] = std::make_pair(count_maxx, maxx_idx);
-                extremepoints[0] = std::make_pair(count_minx, minx_idx);
-                extremepoints[0] = std::make_pair(count_maxy, maxy_idx);
-                extremepoints[0] = std::make_pair(count_miny, miny_idx);
-                std::sort(extremepoints.begin(), extremepoints.end(), compare_extreme_first<unsigned long long, double>);
+                extremepoints[1] = std::make_pair(count_minx, minx_idx);
+                extremepoints[1] = std::make_pair(count_maxy, maxy_idx);
+                extremepoints[2] = std::make_pair(count_miny, miny_idx);
+                std::sort(extremepoints.begin(), extremepoints.end(), compare_extreme_first<unsigned long long, T>);
                 selected_id = extremepoints[0].second;
                 if(extremepoints[0].first > 1){
                     mayresort = true;
@@ -209,8 +219,8 @@ namespace polygon{
             pmaxy_ = points_[maxy_idx];
         }
         // now the result is a starpolygon.
-        // printf("selected element points is selected_id %lld, position is (%lf, %lf).\n", selected_id, (double)points_[selected_id]->x, (double)points_[selected_id]->y);
-
+        printf("selected element points is selected_id %lld, position is (%lf, %lf).\n", selected_id, (double)points_[selected_id]->x, (double)points_[selected_id]->y);
+        
         point2d_t<T>::star_center = points_[selected_id];
         point2d_t<T>* temp = points_[0];
         points_[0] = points_[selected_id];

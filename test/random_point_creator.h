@@ -6,7 +6,8 @@
 namespace polygon{
     template <class T>
     void CreateRandomPoints2d(unsigned long long contained_size, std::pair<T, T> range_min, std::pair<T, T> range_max, std::vector<point2d_t<T>>& created_points){
-        srand((unsigned)time(NULL));
+        srand((unsigned)time(0));
+
         if(range_min.first > range_max.first){
             T min_first = range_min.first;
             range_min.first = range_max.first;
@@ -27,9 +28,11 @@ namespace polygon{
             // the double part
             T dx = rand() % 10000 / 10000.;
             T dy = rand() % 10000 / 10000.;
-
+            
             created_points.emplace_back(point2d_t<T>::CreatePoint(x+dx, y+dy));
+            printf("create p x, y (%lf, %lf).\n", created_points[created_points.size()-1].x, created_points[created_points.size()-1].y);
         }
+    
     }
 }
 

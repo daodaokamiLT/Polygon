@@ -24,25 +24,38 @@ namespace polygon{
             PolygonIntersecting(Polygon<T>* pgf, Polygon<T>* pgs):polygon_firstptr_(pgf), polygon_secondptr_(pgs){}
             void CalBridge();
             void SplitPolygon2MonotoneChain();// can get four chain, than use these four chain to cal if has interface
+
             void GetFirstMonoChain(std::vector<point2d_t<T>*>& leftchain, std::vector<point2d_t<T>*>& rightchain);
-            void GetSecondMonoChain(std::vector<point2d_t<T>*>& leftchain, std::vector<point2d_t<T>*>& rightchain);
+
+            void GetFirstMonoChainXbase(std::vector<point2d_t<T>*>& leftchain, std::vector<point2d_t<T>*>& rightchain);
+            void GetSecondMonoChainXbase(std::vector<point2d_t<T>*>& leftchain, std::vector<point2d_t<T>*>& rightchain);
+            void GetFirstMonoChainYbase(std::vector<point2d_t<T>*>& leftchain, std::vector<point2d_t<T>*>& rightchain);
+            void GetSecondMonoChainYbase(std::vector<point2d_t<T>*>& leftchain, std::vector<point2d_t<T>*>& rightchain);
         private:
             // decide a main direction, to split polygon. just use ox(_|_)oy
             // split ordered:
             // 1. if down border has point in same line, alls push into after chain
             // 2. if up border has point in same line, alls push into before chain
-            MonotoneChain<T> leftfirst_monochain_;
-            MonotoneChain<T> rightfirst_monochain_;
-            MonotoneChain<T> leftsecond_monochain_;
-            MonotoneChain<T> rightsecond_monochain_;
+            bool xory_major_ = false;
+
+            MonotoneChain<T> leftfirst_monochain_xbase_;
+            MonotoneChain<T> rightfirst_monochain_xbase_;
+            MonotoneChain<T> leftsecond_monochain_xbase_;
+            MonotoneChain<T> rightsecond_monochain_xbase_;
+
+            MonotoneChain<T> leftfirst_monochain_ybase_;
+            MonotoneChain<T> rightfirst_monochain_ybase_;
+            MonotoneChain<T> leftsecond_monochain_ybase_;
+            MonotoneChain<T> rightsecond_monochain_ybase_;
+
             Polygon<T>* polygon_firstptr_ = nullptr;
             Polygon<T>* polygon_secondptr_ = nullptr;
 
-            bool isSmallerorBiggerX(polygon::Polygon<T>* ptr, const bool& isclockwise, const int& last_count, int& cur_count); // can change the curcount to avoid all points in a line .
-            bool isSmallerorBiggerXLock(polygon::Polygon<T>* ptr, const bool& isclockwise, const int& last_count, int& cur_count);
+            bool IsSmallerorBiggerX(polygon::Polygon<T>* ptr, const bool& isclockwise, const int& last_count, int& cur_count); // can change the curcount to avoid all points in a line .
+            bool IsSmallerorBiggerXLock(polygon::Polygon<T>* ptr, const bool& isclockwise, const int& last_count, int& cur_count);
 
-            bool isSmallerorBiggerY(polygon::Polygon<T>* ptr, const bool& isclockwise, const int& last_count, int& cur_count); // can change the curcount to avoid all points in a line .
-            bool isSmallerorBiggerYLock(polygon::Polygon<T>* ptr, const bool& isclockwise, const int& last_count, int& cur_count);
+            bool IsSmallerorBiggerY(polygon::Polygon<T>* ptr, const bool& isclockwise, const int& last_count, int& cur_count); // can change the curcount to avoid all points in a line .
+            bool IsSmallerorBiggerYLock(polygon::Polygon<T>* ptr, const bool& isclockwise, const int& last_count, int& cur_count);
 
     };
 }

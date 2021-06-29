@@ -180,7 +180,6 @@ int main(int argc, char* argv[]){
     }   
     // cv::imshow("secondleft+rightchain_ybase", img5);
 
-
     cv::waitKey(0);
     cv::destroyAllWindows();
     points.clear();

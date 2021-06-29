@@ -78,7 +78,7 @@ namespace polygon{
                 ++counterLP;
         }
         linepoint2d_t(const int& monochaintype, const bool& updatetag){
-            monochain_id = monochain_id;
+            monochainid = monochaintype;
             if(updatetag)
                 ++counterLP;
         }
@@ -98,14 +98,14 @@ namespace polygon{
             point2dptr = ptr;
             tag = counterLP;
             isleft = il;
-            monochain_id = monochaintype;
+            monochainid = monochaintype;
             if(updatetag)
                 ++counterLP;
         }
         point2d_t<T>* point2dptr = nullptr;
         bool isleft = true;
         unsigned long long tag = 0ull;
-        unsigned long long monochain_id;
+        unsigned long long monochainid;
         private:
             static std::atomic_ullong counterLP;// 条直线有关于当前vector中排列的索引序号，设置成tag，多个点可以是一个tag    
     };
@@ -171,8 +171,8 @@ namespace polygon{
             void GetFirstMonoChainYbase(std::vector<point2d_t<T>*>& leftchain, std::vector<point2d_t<T>*>& rightchain);
             void GetSecondMonoChainYbase(std::vector<point2d_t<T>*>& leftchain, std::vector<point2d_t<T>*>& rightchain);
 
-            bool PotentionIntersection(MonotoneChain<T>& monochain0, MonotoneChain<T>& monochain1, std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_hor, std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_vel);
-
+            bool HasIntersection(const bool& usexorybase = false);
+            void CostructIntersectionPolygon(const MonotoneChain<T>& inter);
         private:
             // decide a main direction, to split polygon. just use ox(_|_)oy
             // split ordered:
@@ -200,9 +200,13 @@ namespace polygon{
             bool IsSmallerorBiggerYLock(polygon::Polygon<T>* ptr, const bool& isclockwise, const int& last_count, int& cur_count);
 
             void OrderLineEndPoints();
-            bool PotentionIntersection(std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_hor, std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_vel);
+            bool PotentionIntersection(const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_hor, const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_vel);
+            // bool PotentionIntersection(const MonotoneChain<T>& monochain0, const MonotoneChain<T>& monochain1, const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_hor, const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_vel);
             std::vector<linepoint2d_t<T>> sorted_extremelinepoint2d_xbase_hor_, sorted_extremelinepoint2d_xbase_vel_;
             std::vector<linepoint2d_t<T>> sorted_extremelinepoint2d_ybase_hor_, sorted_extermelinepoint2d_ybase_vel_; 
+
+            bool HasIntersection_Xbase();
+            bool HasIntersection_Ybase();
     };
 }
 

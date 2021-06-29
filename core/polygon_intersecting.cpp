@@ -2,8 +2,6 @@
 #include <limits>
 
 namespace polygon{
-
-
     template <class T>
     bool MonotoneChain<T>::GetMidEdge(extreme_edge_t<T>& midedge, MonotoneChain<T>& monochan_before, MonotoneChain<T>& monochain_after){
         int size = points_chain.size();
@@ -30,7 +28,7 @@ namespace polygon{
     template <class T>
     void findextreme(MonotoneChain<T>& monochain, linepoint2d_t<T>& p_left, linepoint2d_t<T>& p_right, linepoint2d_t<T>& p_up, linepoint2d_t<T>& p_down){
         T min_x = std::numeric_limits<T>::max(), max_x = std::numeric_limits<T>::min(), min_y = std::numeric_limits<T>::max(), max_y = std::numeric_limits<T>::min();
-        size_t minx_index = 0, maxx_index = 0, miny_index = 0, maxy_index = 0; 
+        size_t minx_index = 0, maxx_index = 0, miny_index = 0, maxy_index = 0;
         for(size_t i=0; i<monochain.points_chain.size();++i){
             if(min_x > monochain.points_chain[i]->x){
                 min_x = monochain.points_chain[i]->x;
@@ -84,7 +82,6 @@ namespace polygon{
             exit(-1);
         }
 
-
         // second polygon
         linepoint2d_t<T> linepoint2d_fromL2nd_xbase_leftest(2, false), linepoint2d_fromL2nd_xbase_rightest(2, false), linepoint2d_fromL2nd_xbase_topest(2, false), linepoint2d_fromL2nd_xbase_bottomest(2, true);
         findextreme(leftsecond_monochain_xbase_, linepoint2d_fromL2nd_xbase_leftest, linepoint2d_fromL2nd_xbase_rightest, linepoint2d_fromL2nd_xbase_topest, linepoint2d_fromL2nd_xbase_bottomest);
@@ -111,8 +108,6 @@ namespace polygon{
             printf("error, the first extreme points get error, same polygon topest and bottomest y is not same.\n");
             exit(-1);
         }
-
-
 
         // ----- second ybase
         linepoint2d_t<T> linepoint2d_fromL2nd_ybase_leftest(6, false), linepoint2d_fromL2nd_ybase_rightest(6, false), linepoint2d_fromL2nd_ybase_topest(6, false), linepoint2d_fromL2nd_ybase_bottomest(6, true);
@@ -153,20 +148,33 @@ namespace polygon{
         std::sort(sorted_extermelinepoint2d_ybase_vel_.begin(), sorted_extermelinepoint2d_ybase_vel_.end(), Compare_Ymin_minxpre);
         // 在四个队列中，进行排序查看是否有可能的重合部分， 若有则进行递归求解。
     }
-    
-    template <class T>
-    bool PolygonIntersecting<T>::PotentionIntersection(MonotoneChain<T>& monochain0, MonotoneChain<T>& monochain1, std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_hor, std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_vel){
-        // monochain has 
-        bool possible = PotentionIntersection(sorted_extremelinepoint2d_hor, sorted_extremelinepoint2d_vel);
-        if(!possible){
-            return false;
-        }
-        // set possible 
-        return possible;
-    }
+    /**
+     * @brief 不处理同一个polygon的相交问题。
+     * 
+     * **/
+    /*// template <class T>
+    // bool PolygonIntersecting<T>::PotentionIntersection(const MonotoneChain<T>& monochain0, const MonotoneChain<T>& monochain1, const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_hor, const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_vel){
+    //     // monochain has
+    //     if(monochain0.points_chain.size() < 2 || sorted_extremelinepoint2d_hor.size() != 4 || sorted_extremelinepoint2d_vel.size() != 4){
+    //         printf("error, monochain cannot < 2 or sorted size not equalwith 4.\n");
+    //         exit(-1);
+    //     }
+    //     if(monochain0.monochainid == monochain1.monochainid){
+    //         printf("error, cannot create by the same monochain.\n");
+    //         exit(-1);
+    //     }
 
+    //     bool possible = PotentionIntersection(sorted_extremelinepoint2d_hor, sorted_extremelinepoint2d_vel);
+    //     if(!possible){
+    //         return false;
+    //     }
+    //     // set possible 
+    //     return possible;
+    // }*/
+
+    // we think the monochain 
     template <class T>
-    bool PolygonIntersecting<T>::PotentionIntersection(std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_hor, std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_vel){ // sort 肯定是偶数的
+    bool PolygonIntersecting<T>::PotentionIntersection(const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_hor, const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_vel){ // sort 肯定是偶数的
         // monochain has
         if(sorted_extremelinepoint2d_hor.size() != 4 || sorted_extremelinepoint2d_vel.size() != 0){
             printf("please init valid sorted extremelinepoints, before use this method.\n");
@@ -176,10 +184,53 @@ namespace polygon{
             printf("the fist element must be tag = left.\n");
             exit(-1);
         }
-        bool possible = false;
-        
-        return possible;
-
+        bool possible_xbase = false;
+        // 永远都是两条边，四个点
+        if(sorted_extremelinepoint2d_hor[0].tag == sorted_extremelinepoint2d_hor[1].tag &&
+                sorted_extremelinepoint2d_hor[0].monochainid == sorted_extremelinepoint2d_hor[1].monochainid){
+            if(sorted_extremelinepoint2d_hor[2].tag != sorted_extremelinepoint2d_hor[3].tag ||
+                sorted_extremelinepoint2d_hor[2].monochainid != sorted_extremelinepoint2d_hor[3].monochainid){
+                printf("error, sorted extremelinepoints format is not ture.\n");
+                exit(-1);
+            }
+            possible_xbase = false;
+        }
+        else if(sorted_extremelinepoint2d_hor[0].tag != sorted_extremelinepoint2d_hor[1].tag && 
+                sorted_extremelinepoint2d_hor[0].monochainid != sorted_extremelinepoint2d_hor[1].monochainid){
+            if(sorted_extremelinepoint2d_hor[0].tag != sorted_extremelinepoint2d_hor[2].tag && sorted_extremelinepoint2d_hor[0].tag != sorted_extremelinepoint2d_hor[3].tag){
+                printf("error, sorted extremelinepoints format is not ture.\n");
+                exit(-1);
+            }
+            if(sorted_extremelinepoint2d_hor[1].tag != sorted_extremelinepoint2d_hor[2].tag && sorted_extremelinepoint2d_hor[1].tag != sorted_extremelinepoint2d_hor[3].tag){
+                printf("error, sorted extremelinepoints format is not ture.\n");
+                exit(-1);
+            }
+            possible_xbase = true;
+        }// else is all false.
+        // second judgement
+        bool possible_ybase = false;
+        if(sorted_extremelinepoint2d_vel[0].tag == sorted_extremelinepoint2d_vel[1].tag &&
+                sorted_extremelinepoint2d_vel[0].monochainid == sorted_extremelinepoint2d_vel[1].monochainid){
+            if(sorted_extremelinepoint2d_vel[2].tag != sorted_extremelinepoint2d_vel[3].tag ||
+                sorted_extremelinepoint2d_vel[2].monochainid != sorted_extremelinepoint2d_vel[3].monochainid){
+                printf("error, sorted extremelinepoints format is not ture.\n");
+                exit(-1);
+            }
+            possible_ybase = false;
+        }
+        else if(sorted_extremelinepoint2d_vel[0].tag != sorted_extremelinepoint2d_vel[1].tag && 
+                sorted_extremelinepoint2d_vel[0].monochainid != sorted_extremelinepoint2d_vel[1].monochainid){
+            if(sorted_extremelinepoint2d_vel[0].tag != sorted_extremelinepoint2d_vel[2].tag && sorted_extremelinepoint2d_vel[0].tag != sorted_extremelinepoint2d_vel[3].tag){
+                printf("error, sorted extremelinepoints format is not ture.\n");
+                exit(-1);
+            }
+            if(sorted_extremelinepoint2d_vel[1].tag != sorted_extremelinepoint2d_vel[2].tag && sorted_extremelinepoint2d_vel[1].tag != sorted_extremelinepoint2d_vel[3].tag){
+                printf("error, sorted extremelinepoints format is not ture.\n");
+                exit(-1);
+            }
+            possible_ybase = true;
+        }// else is all false.
+        return possible_xbase && possible_ybase; // 只有1 1 时才是可能有交点的.
     }
     /***
      * 
@@ -295,7 +346,6 @@ namespace polygon{
         printf("run in 2.\n");
         return IsSmallerorBiggerYLock(ptr, isclockwise, last_count, cur_count);
     }
-
 
     template <class T>
     void PolygonIntersecting<T>::SplitPolygon2MonotoneChain(){
@@ -813,7 +863,6 @@ namespace polygon{
         leftchain.assign(leftsecond_monochain_xbase_.points_chain.begin(), leftsecond_monochain_xbase_.points_chain.end());
         rightchain.assign(rightsecond_monochain_xbase_.points_chain.begin(), rightsecond_monochain_xbase_.points_chain.end());
     }
-
     
     template <class T>
     void PolygonIntersecting<T>::GetFirstMonoChainYbase(std::vector<point2d_t<T>*>& leftchain, std::vector<point2d_t<T>*>& rightchain){
@@ -827,5 +876,39 @@ namespace polygon{
         leftchain.clear(); rightchain.clear();
         leftchain.assign(leftsecond_monochain_ybase_.points_chain.begin(), leftsecond_monochain_ybase_.points_chain.end());
         rightchain.assign(rightsecond_monochain_ybase_.points_chain.begin(), rightsecond_monochain_ybase_.points_chain.end());
+    }
+
+    template <class T>
+    bool PolygonIntersecting<T>::HasIntersection(const bool& usexorybase){
+        // 自己选择 // 0 x  12 y
+        bool possible = false;
+        if(usexorybase){
+            possible = HasIntersection_Ybase();
+        }
+        else{
+            possible = HasIntersection_Xbase();
+        }
+        return possible;
+    }
+
+    template <class T>
+    bool PolygonIntersecting<T>::HasIntersection_Xbase(){
+        if(sorted_extremelinepoint2d_xbase_hor_.size()!=4 || sorted_extremelinepoint2d_xbase_vel_.size() != 4){
+            printf("error, hasn't OrderLinePoints.\n");
+            exit(-1);
+        }
+        return PotentionIntersection(sorted_extremelinepoint2d_xbase_hor_, sorted_extremelinepoint2d_xbase_vel_);
+    }
+
+
+    template <class T>
+    bool PolygonIntersecting<T>::HasIntersection_Ybase(){
+        if(sorted_extremelinepoint2d_ybase_hor_.size() != 4 || sorted_extermelinepoint2d_ybase_vel_.size() != 4){
+            printf("error, hasn't OrderLinePoints.\n");
+            exit(-1);
+        }
+        bool possible = false;
+        return PotentionIntersection(sorted_extremelinepoint2d_ybase_hor_, sorted_extermelinepoint2d_ybase_vel_);
+        
     }
 }

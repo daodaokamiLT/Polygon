@@ -20,10 +20,67 @@ namespace polygon{
         MonotoneChain() = default;
         MonotoneChain(int mcid):monochainid(mcid){}
     };
- 
+    
+    // 用来寻找polygon 的第几条边的。
+    struct extremeedge_index_t{
+        int first_index;
+        int second_index;
+    };
+    // 必须是两个单吊链
+    template <class T>
+    bool PotentionIntersection(MonotoneChain<T>& monochain0, MonotoneChain<T>& monochain1){
+        T minx0 = std::numeric_limits<T>::max(), miny0 = std::numeric_limits<T>::max(), 
+          maxx0 = std::numeric_limits<T>::min(), maxy0 = std::numeric_limits<T>::max();
+        T minx1 = std::numeric_limits<T>::max(), miny1 = std::numeric_limits<T>::max(), 
+          maxx1 = std::numeric_limits<T>::min(), maxy1 = std::numeric_limits<T>::max();
+        
+        for(auto elem : monochain0.points_chain){
+            if(minx0 > elem->x)
+                minx0 = elem->x;
+            if(miny0 > elem->y)
+                miny0 = elem->y;
+            if(maxx0 < elem->x)
+                maxx0 = elem->x;
+            if(maxy0 < elem->y)
+                maxy0 = elem->y;
+        }
+        for(auto elem : monochain1.points_chain){
+            if(minx1 > elem->x)
+                minx1 = elem->x;
+            if(miny1 > elem->y)
+                miny1 = elem->y;
+            if(maxx1 < elem->x)
+                maxx1 = elem->x;
+            if(maxy1 < elem->y)
+                maxy1 = elem->y;
+        }
+        bool possiblex = IsRangeMixed(minx0, maxx0, minx1, maxx1);
+        bool possibley = IsRangeMixed(miny0, maxy0, minx1, maxy1);
+
+        return (possiblex && possibley);
+    }
+
+    // 是有可能都有相交，但是一个交点都没有情况出现的。
+    template <class T>
+    bool IsRangeMixed(T min0, T max0, T min1, T max1){
+        if(min0 < min1){
+            if(max0 >= min1){
+                return true;
+            }
+        }
+        else if(min0 > min1){
+            if(max1 >= min0){
+                return true;
+            }
+        }
+        else{
+            return true;
+        }
+        return false;
+    }
 
     template <class T>
-    bool IsLineIntersecting(extreme_edge_t<T>& segment0, extreme_edge_t<T>&segment1){
+    bool IsLineIntersecting(const extreme_edge_t<T>& segment0, const extreme_edge_t<T>&segment1){
         bool flag_endpoint0 = false, flag_endpoint1 = false;
         if(segment0.p_start->Equal(segment1.p_start) || segment0.p_start->Equal(segment1.p_end)){
             printf("segment0 is intersecting with segment1 at endpoint start.\n");
@@ -173,6 +230,30 @@ namespace polygon{
 
             bool HasIntersection(const bool& usexorybase = false);
             void CostructIntersectionPolygon(const MonotoneChain<T>& inter);
+
+            void CalIntersectionBetweenTwoConvexPolygon();
+
+            ~PolygonIntersecting(){
+                leftfirst_monochain_xbase_.points_chain.clear();
+                rightfirst_monochain_xbase_.points_chain.clear();
+                leftsecond_monochain_xbase_.points_chain.clear();
+                rightsecond_monochain_xbase_.points_chain.clear();
+
+                leftfirst_monochain_ybase_.points_chain.clear();
+                rightfirst_monochain_ybase_.points_chain.clear();
+                leftsecond_monochain_ybase_.points_chain.clear();
+                rightsecond_monochain_ybase_.points_chain.clear();
+            }
+
+            void Clear(){
+                if(!intersections_.empty()){
+                    for(auto inter : intersections_){
+                        delete inter->second;
+                        inter->second = nullptr;
+                    }
+                    intersections_.clear();
+                }
+            }
         private:
             // decide a main direction, to split polygon. just use ox(_|_)oy
             // split ordered:
@@ -200,13 +281,24 @@ namespace polygon{
             bool IsSmallerorBiggerYLock(polygon::Polygon<T>* ptr, const bool& isclockwise, const int& last_count, int& cur_count);
 
             void OrderLineEndPoints();
+            bool PotentionIntersection(const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d);
             bool PotentionIntersection(const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_hor, const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_vel);
             // bool PotentionIntersection(const MonotoneChain<T>& monochain0, const MonotoneChain<T>& monochain1, const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_hor, const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_vel);
-            std::vector<linepoint2d_t<T>> sorted_extremelinepoint2d_xbase_hor_, sorted_extremelinepoint2d_xbase_vel_;
-            std::vector<linepoint2d_t<T>> sorted_extremelinepoint2d_ybase_hor_, sorted_extermelinepoint2d_ybase_vel_; 
-
+            std::vector<linepoint2d_t<T>> sorted_extremelinepoint2d_xbase_hor_, sorted_extremelinepoint2d_xbase_vel00_, sorted_extremelinepoint2d_xbase_vel01_, sorted_extremelinepoint2d_xbase_vel10_, sorted_extremelinepoint2d_xbase_vel11_;
+            std::vector<linepoint2d_t<T>> sorted_extremelinepoint2d_ybase_hor00_, sorted_extremelinepoint2d_ybase_hor01_, sorted_extremelinepoint2d_ybase_hor10_, sorted_extremelinepoint2d_ybase_hor11_, sorted_extermelinepoint2d_ybase_vel_; 
+            
             bool HasIntersection_Xbase();
             bool HasIntersection_Ybase();
+
+            /**
+             * @brief intersection idx 
+             * xbase 000, 001, 010, 011 (0_ xbase, 1_ 0:first leftchain, 1:first rightchain, 2_: 0:second leftchain, 1:second rightchain)
+             * ybase 100, 101, 110, 111 (1_ ybase, .....)
+            */
+            std::vector<std::string> potention_intersection_tags_;
+            std::vector<std::pair<extremeedge_index_t, point2d_t<T>*>> intersections_; // 存储的是在monochain中的位置和 对应的点位置
+
+            void CalIntersectionBetweenTwoMonochainLine(const MonotoneChain<T>& chain0, const MonotoneChain<T>& chain1, int start0, int start1); 
     };
 }
 

@@ -5,6 +5,8 @@
 
 int main(int argc, char* argv[]){
     
+    // create two polygon that has interface.
+    
 
 
     return 0;

@@ -1,6 +1,13 @@
 #include "polygon_intersecting.h"
 #include <limits>
-
+/***
+ * 
+ * 需要解决那种交在定点上，或者重合的问题
+ * 
+ * 
+ * 
+ * 
+*/
 namespace polygon{
     template <class T>
     bool MonotoneChain<T>::GetMidEdge(extreme_edge_t<T>& midedge, MonotoneChain<T>& monochan_before, MonotoneChain<T>& monochain_after){
@@ -128,24 +135,70 @@ namespace polygon{
         sorted_extremelinepoint2d_xbase_hor_.emplace_back(linepoint2d_fromL2nd_xbase_leftest);
         sorted_extremelinepoint2d_xbase_hor_.emplace_back(linepoint2d_fromL2nd_xbase_rightest);
         std::sort(sorted_extremelinepoint2d_xbase_hor_.begin(), sorted_extremelinepoint2d_xbase_hor_.end(), Compare_Xmin_minypre);
-        sorted_extremelinepoint2d_xbase_vel_.clear();
-        sorted_extremelinepoint2d_xbase_vel_.emplace_back(linepoint2d_fromL1st_xbase_topest);
-        sorted_extremelinepoint2d_xbase_vel_.emplace_back(linepoint2d_fromL1st_xbase_bottomest);
-        sorted_extremelinepoint2d_xbase_vel_.emplace_back(linepoint2d_fromL2nd_xbase_topest);
-        sorted_extremelinepoint2d_xbase_vel_.emplace_back(linepoint2d_fromL2nd_xbase_bottomest);
-        std::sort(sorted_extremelinepoint2d_xbase_vel_.begin(), sorted_extremelinepoint2d_xbase_vel_.end(), Compare_Ymin_minxpre);
-        sorted_extremelinepoint2d_ybase_hor_.clear();
-        sorted_extremelinepoint2d_ybase_hor_.emplace_back(linepoint2d_fromL1st_ybase_leftest);
-        sorted_extremelinepoint2d_ybase_hor_.emplace_back(linepoint2d_fromL1st_ybase_rightest);
-        sorted_extremelinepoint2d_ybase_hor_.emplace_back(linepoint2d_fromL2nd_ybase_leftest);
-        sorted_extremelinepoint2d_ybase_hor_.emplace_back(linepoint2d_fromL2nd_ybase_rightest);
-        std::sort(sorted_extremelinepoint2d_ybase_hor_.begin(), sorted_extremelinepoint2d_ybase_hor_.end(), Compare_Xmin_minypre);
+
+        sorted_extremelinepoint2d_xbase_vel00_.clear();
+        sorted_extremelinepoint2d_xbase_vel00_.emplace_back(linepoint2d_fromL1st_xbase_topest);
+        sorted_extremelinepoint2d_xbase_vel00_.emplace_back(linepoint2d_fromL1st_xbase_bottomest);
+        sorted_extremelinepoint2d_xbase_vel00_.emplace_back(linepoint2d_fromL2nd_xbase_topest);
+        sorted_extremelinepoint2d_xbase_vel00_.emplace_back(linepoint2d_fromL2nd_xbase_bottomest);
+        std::sort(sorted_extremelinepoint2d_xbase_vel00_.begin(), sorted_extremelinepoint2d_xbase_vel00_.end(), Compare_Ymin_minxpre);
+        
+        sorted_extremelinepoint2d_xbase_vel01_.clear();
+        sorted_extremelinepoint2d_xbase_vel01_.emplace_back(linepoint2d_fromL1st_xbase_topest);
+        sorted_extremelinepoint2d_xbase_vel01_.emplace_back(linepoint2d_fromL1st_xbase_bottomest);
+        sorted_extremelinepoint2d_xbase_vel01_.emplace_back(linepoint2d_fromR2nd_xbase_topest);
+        sorted_extremelinepoint2d_xbase_vel01_.emplace_back(linepoint2d_fromR2nd_xbase_bottomest);
+        std::sort(sorted_extremelinepoint2d_xbase_vel01_.begin(), sorted_extremelinepoint2d_xbase_vel01_.end(), Compare_Ymin_minxpre);
+
+        sorted_extremelinepoint2d_xbase_vel10_.clear();
+        sorted_extremelinepoint2d_xbase_vel10_.emplace_back(linepoint2d_fromR1st_xbase_topest);
+        sorted_extremelinepoint2d_xbase_vel10_.emplace_back(linepoint2d_fromR1st_xbase_bottomest);
+        sorted_extremelinepoint2d_xbase_vel10_.emplace_back(linepoint2d_fromL2nd_xbase_topest);
+        sorted_extremelinepoint2d_xbase_vel10_.emplace_back(linepoint2d_fromL2nd_xbase_bottomest);
+        std::sort(sorted_extremelinepoint2d_xbase_vel10_.begin(), sorted_extremelinepoint2d_xbase_vel10_.end(), Compare_Ymin_minxpre);
+
+        sorted_extremelinepoint2d_xbase_vel11_.clear();
+        sorted_extremelinepoint2d_xbase_vel11_.emplace_back(linepoint2d_fromR1st_xbase_topest);
+        sorted_extremelinepoint2d_xbase_vel11_.emplace_back(linepoint2d_fromR1st_xbase_bottomest);
+        sorted_extremelinepoint2d_xbase_vel11_.emplace_back(linepoint2d_fromR2nd_xbase_topest);
+        sorted_extremelinepoint2d_xbase_vel11_.emplace_back(linepoint2d_fromR2nd_xbase_bottomest);
+        std::sort(sorted_extremelinepoint2d_xbase_vel11_.begin(), sorted_extremelinepoint2d_xbase_vel11_.end(), Compare_Ymin_minxpre);
+
         sorted_extermelinepoint2d_ybase_vel_.clear();
         sorted_extermelinepoint2d_ybase_vel_.emplace_back(linepoint2d_fromL1st_ybase_topest);
         sorted_extermelinepoint2d_ybase_vel_.emplace_back(linepoint2d_fromL1st_ybase_bottomest);
         sorted_extermelinepoint2d_ybase_vel_.emplace_back(linepoint2d_fromL2nd_ybase_topest);
         sorted_extermelinepoint2d_ybase_vel_.emplace_back(linepoint2d_fromL2nd_ybase_bottomest);
         std::sort(sorted_extermelinepoint2d_ybase_vel_.begin(), sorted_extermelinepoint2d_ybase_vel_.end(), Compare_Ymin_minxpre);
+
+        sorted_extremelinepoint2d_ybase_hor00_.clear();
+        sorted_extremelinepoint2d_ybase_hor00_.emplace_back(linepoint2d_fromL1st_ybase_leftest);
+        sorted_extremelinepoint2d_ybase_hor00_.emplace_back(linepoint2d_fromL1st_ybase_rightest);
+        sorted_extremelinepoint2d_ybase_hor00_.emplace_back(linepoint2d_fromL2nd_ybase_leftest);
+        sorted_extremelinepoint2d_ybase_hor00_.emplace_back(linepoint2d_fromL2nd_ybase_rightest);
+        std::sort(sorted_extremelinepoint2d_ybase_hor00_.begin(), sorted_extremelinepoint2d_ybase_hor00_.end(), Compare_Xmin_minypre);
+        
+        sorted_extremelinepoint2d_ybase_hor01_.clear();
+        sorted_extremelinepoint2d_ybase_hor01_.emplace_back(linepoint2d_fromL1st_ybase_leftest);
+        sorted_extremelinepoint2d_ybase_hor01_.emplace_back(linepoint2d_fromL1st_ybase_rightest);
+        sorted_extremelinepoint2d_ybase_hor01_.emplace_back(linepoint2d_fromR2nd_ybase_leftest);
+        sorted_extremelinepoint2d_ybase_hor01_.emplace_back(linepoint2d_fromR2nd_ybase_rightest);
+        std::sort(sorted_extremelinepoint2d_ybase_hor01_.begin(), sorted_extremelinepoint2d_ybase_hor01_.end(), Compare_Xmin_minypre);
+        
+        sorted_extremelinepoint2d_ybase_hor10_.clear();
+        sorted_extremelinepoint2d_ybase_hor10_.emplace_back(linepoint2d_fromR1st_ybase_leftest);
+        sorted_extremelinepoint2d_ybase_hor10_.emplace_back(linepoint2d_fromR1st_ybase_rightest);
+        sorted_extremelinepoint2d_ybase_hor10_.emplace_back(linepoint2d_fromL2nd_ybase_leftest);
+        sorted_extremelinepoint2d_ybase_hor10_.emplace_back(linepoint2d_fromL2nd_ybase_rightest);
+        std::sort(sorted_extremelinepoint2d_ybase_hor10_.begin(), sorted_extremelinepoint2d_ybase_hor10_.end(), Compare_Xmin_minypre);
+        
+        sorted_extremelinepoint2d_ybase_hor11_.clear();
+        sorted_extremelinepoint2d_ybase_hor11_.emplace_back(linepoint2d_fromR1st_ybase_leftest);
+        sorted_extremelinepoint2d_ybase_hor11_.emplace_back(linepoint2d_fromR1st_ybase_rightest);
+        sorted_extremelinepoint2d_ybase_hor11_.emplace_back(linepoint2d_fromR2nd_ybase_leftest);
+        sorted_extremelinepoint2d_ybase_hor11_.emplace_back(linepoint2d_fromR2nd_ybase_rightest);
+        std::sort(sorted_extremelinepoint2d_ybase_hor11_.begin(), sorted_extremelinepoint2d_ybase_hor11_.end(), Compare_Xmin_minypre);
+        
         // 在四个队列中，进行排序查看是否有可能的重合部分， 若有则进行递归求解。
     }
     /**
@@ -231,6 +284,21 @@ namespace polygon{
             possible_ybase = true;
         }// else is all false.
         return possible_xbase && possible_ybase; // 只有1 1 时才是可能有交点的.
+    }
+    
+    
+    template <class T>
+    bool PolygonIntersecting<T>::PotentionIntersection(const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d){
+        if(sorted_extremelinepoint2d.size() != 4){
+            printf("error, the sorted extremeline points is not equal with 4.\n");
+            exit(-1);
+        }
+        if(sorted_extremelinepoint2d[0].monochainid != sorted_extremelinepoint2d[1].monochainid && sorted_extremelinepoint2d[0].tag != sorted_extremelinepoint2d[1].tag){
+            return true;
+        }
+        else{
+            return false;        
+        }
     }
     /***
      * 
@@ -881,6 +949,7 @@ namespace polygon{
     template <class T>
     bool PolygonIntersecting<T>::HasIntersection(const bool& usexorybase){
         // 自己选择 // 0 x  12 y
+        potention_intersection_tags_.clear();
         bool possible = false;
         if(usexorybase){
             possible = HasIntersection_Ybase();
@@ -893,22 +962,199 @@ namespace polygon{
 
     template <class T>
     bool PolygonIntersecting<T>::HasIntersection_Xbase(){
-        if(sorted_extremelinepoint2d_xbase_hor_.size()!=4 || sorted_extremelinepoint2d_xbase_vel_.size() != 4){
+        if(sorted_extremelinepoint2d_xbase_hor_.size()!=4 || (sorted_extremelinepoint2d_xbase_vel00_.size() != 4 && sorted_extremelinepoint2d_xbase_vel01_.size() != 4 
+                    && sorted_extremelinepoint2d_xbase_vel10_.size() != 4 && sorted_extremelinepoint2d_xbase_vel11_.size() != 4)){
             printf("error, hasn't OrderLinePoints.\n");
             exit(-1);
         }
-        return PotentionIntersection(sorted_extremelinepoint2d_xbase_hor_, sorted_extremelinepoint2d_xbase_vel_);
+        if(PotentionIntersection(sorted_extremelinepoint2d_xbase_hor_)){
+            // just need one possible that canbe has intersection.
+            bool flag = false;
+            if(PotentionIntersection(sorted_extremelinepoint2d_xbase_vel00_)){
+                potention_intersection_tags_.emplace_back("000");
+                flag = true;
+            }
+            if(PotentionIntersection(sorted_extremelinepoint2d_xbase_vel01_)){
+                potention_intersection_tags_.emplace_back("001");
+                flag = true;
+            }
+            if(PotentionIntersection(sorted_extremelinepoint2d_xbase_vel10_)){
+                potention_intersection_tags_.emplace_back("010");
+                flag = true;
+            }
+            if(PotentionIntersection(sorted_extremelinepoint2d_xbase_vel11_)){
+                potention_intersection_tags_.emplace_back("011");
+                flag = true;
+            }
+            return flag;
+        }
+        else{
+            return false;
+        }
     }
 
 
     template <class T>
     bool PolygonIntersecting<T>::HasIntersection_Ybase(){
-        if(sorted_extremelinepoint2d_ybase_hor_.size() != 4 || sorted_extermelinepoint2d_ybase_vel_.size() != 4){
+        if((sorted_extremelinepoint2d_ybase_hor00_.size() != 4 && sorted_extremelinepoint2d_ybase_hor01_.size() != 4 && sorted_extremelinepoint2d_ybase_hor10_.size() != 4 && 
+                    sorted_extremelinepoint2d_ybase_hor11_.size() != 4) || sorted_extermelinepoint2d_ybase_vel_.size() != 4){
             printf("error, hasn't OrderLinePoints.\n");
             exit(-1);
         }
         bool possible = false;
-        return PotentionIntersection(sorted_extremelinepoint2d_ybase_hor_, sorted_extermelinepoint2d_ybase_vel_);
-        
+        if(PotentionIntersection(sorted_extermelinepoint2d_ybase_vel_)){
+            bool flag = false;
+            if(PotentionIntersection(sorted_extremelinepoint2d_ybase_hor00_)){
+                potention_intersection_tags_.emplace_back("100");
+                flag = true;
+            }
+            if(PotentionIntersection(sorted_extremelinepoint2d_ybase_hor01_)){
+                potention_intersection_tags_.emplace_back("101");
+                flag = true;
+            }
+            if(PotentionIntersection(sorted_extremelinepoint2d_ybase_hor10_)){
+                potention_intersection_tags_.emplace_back("110");
+                flag = true;
+            }
+            if(PotentionIntersection(sorted_extremelinepoint2d_ybase_hor11_)){
+                potention_intersection_tags_.emplace_back("111");
+                flag = true;
+            }
+        }       
+    }
+
+    template <class T>
+    void PolygonIntersecting<T>::CalIntersectionBetweenTwoConvexPolygon(){
+        if(potention_intersection_tags_.empty()){
+            printf("potention intersection is empty. cannot cal the ConvexPolygon.\n" );
+            return ;
+        }
+        for(auto tag : potention_intersection_tags_){
+            switch (tag)
+            {
+            case "000":
+                /* code */
+                CalIntersectionBetweenTwoMonochainLine(leftfirst_monochain_xbase_, leftsecond_monochain_xbase_, 0, 0);
+                break;
+            case "001":
+                /* code */
+                CalIntersectionBetweenTwoMonochainLine(leftfirst_monochain_xbase_, rightsecond_monochain_xbase_, 0, 0);
+                break;
+            case "010":
+                /* code */
+                CalIntersectionBetweenTwoMonochainLine(rightfirst_monochain_xbase_, leftsecond_monochain_xbase_, 0, 0);
+                break;
+            case "011":
+                /* code */
+                CalIntersectionBetweenTwoMonochainLine(rightfirst_monochain_xbase_, rightsecond_monochain_xbase_, 0, 0);
+                break;
+            case "100":
+                /* code */
+                CalIntersectionBetweenTwoMonochainLine(leftfirst_monochain_ybase_, leftsecond_monochain_ybase_, 0, 0);
+                break;
+            case "101":
+                /* code */
+                CalIntersectionBetweenTwoMonochainLine(leftfirst_monochain_ybase_, rightsecond_monochain_ybase_, 0, 0);
+                break;
+            case "110":
+                /* code */
+                CalIntersectionBetweenTwoMonochainLine(rightfirst_monochain_ybase_, leftsecond_monochain_ybase_, 0, 0);
+                break;
+            case "111":
+                /* code */
+                CalIntersectionBetweenTwoMonochainLine(rightfirst_monochain_ybase_, rightsecond_monochain_ybase_, 0, 0);
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    template <class T>
+    void PolygonIntersecting<T>::CalIntersectionBetweenTwoMonochainLine(const MonotoneChain<T>& chain0, const MonotoneChain<T>& chain1, int start0, int start1){
+        if(chain0.points_chain.size() < 3 && chain1.points_chain.size() < 3){// 都只剩下一条边的时候
+            // 判断当前是否存在交点，并计算交点位置
+            extreme_edge_t<T> midedge0, midedge1;
+            midedge0.p_start = chain0[0];
+            midedge0.p_end = chain0[1];
+            midedge1.p_start = chain1[0];
+            midedge1.p_end = chain1[1];
+            
+            if(IsLineIntersecting(midedge0, midedge1)){
+                // has ， find the point and save into vector
+                point2d_t<T>* inter = new point2d_t<T>(0 ,0); 
+                bool issucc = CalRealIntersectionPosition(midedge0, midedge1, inter);
+                if(issucc){
+                    extremeedge_index_t indexes; 
+                    indexes.first_index = start0;
+                    indexes.second_index = start1;
+                    intersections_.emplace_back(std::make_pair(indexes, inter));
+                }
+                else{
+                    delete inter;
+                }
+            }
+        }
+        else{
+            // 几种状态，需要分别判断，分支递归或者直接判断结果
+            // no intersection
+            MonotoneChain<T> leftchain0, rightchain0, leftchain1, rightchain1;
+            extreme_edge_t<T> midedge0, midedge1;
+            chain0.GetMidEdge(midedge0, leftchain0, rightchain0);
+            chain1.GetMidEdge(midedge1, leftchain1, rightchain1);
+            if(IsLineIntersecting(midedge0, midedge1)){
+                point2d_t<T>* inter = new point2d_t<T>(0 ,0); 
+                bool issucc = CalRealIntersectionPosition(midedge0, midedge1, inter);
+                if(issucc){
+                    extremeedge_index_t indexes; // 在这个位置的点和后面一个点之间的边会存在一个交点
+                    indexes.first_index = start0+(chain0.points_chain.size()-1)/2;
+                    indexes.second_index = start1+(chain1.points_chain.size()-1)/2;
+                    intersections_.emplace_back(std::make_pair(indexes, inter));
+                }
+                else{
+                    delete inter;
+                }
+            }
+            if (PotentionIntersection(leftchain0, leftchain1))
+                CalIntersectionBetweenTwoMonochainLine(leftchain0, leftchain1);
+            if (PotentionIntersection(leftchain0, rightchain1))
+                CalIntersectionBetweenTwoMonochainLine(leftchain0, rightchain1);
+            if (PotentionIntersection(rightchain0, leftchain1))
+                CalIntersectionBetweenTwoMonochainLine(rightchain0, leftchain1);
+            if (PotentionIntersection(rightchain1, rightchain1))
+                CalIntersectionBetweenTwoMonochainLine(rightchain0, rightchain1);
+            
+            return;
+        }
+    }
+    template <class T>
+    bool CalRealIntersectionPosition(const extreme_edge_t<T>& edge0, const extreme_edge_t<T>& edge1, point2d_t<T>* inter){
+        const point2d_t<T>* pa = edge0.p_start;
+        const point2d_t<T>* pb = edge0.p_end;
+        const point2d_t<T>* pc = edge1.p_start;
+        const point2d_t<T>* pd = edge1.p_end;
+
+        Eigen::Matrix4d A = Eigen::Matrix4d::Zero();
+        A(0, 0) = pb->x - pa->x; A(0, 1) = pc->x - pd->x;
+        A(1, 0) = pb->y - pa->y; A(1, 1) = pc->y - pd->y;
+        if(A.determinant() <= 0){
+            // 就没有可用的结果。
+            return false;
+        }
+
+        Eigen::Vector2d b = Eigen::Vector2d::Zero();
+        b[0] = pc->x + pd->x - pa->x - pb->x;
+        b[1] = pc->y + pd->y - pa->y - pb->y;
+        // 因为规模小所以没有所谓的速度差问题
+        Eigen::Vector2d x = A.fullPivLu().solve(b);
+        // 判断是否有解先
+        double l = (1+x[0])/2.;// x[0] = 2l-1
+        double k = (1+x[1])/2.;// x[1] = 2k-1
+        if(l >= 0 && l <= 1 && k>=0 && k<=1){
+            inter->x = (pa->x+(pc->x-pa->x + pd->x-pa->x)+x[1]*(pd->x-pc->x))/2;
+            inter->y = (pa->y+(pc->y-pa->y + pd->y-pa->y)+x[1]*(pd->y-pc->y))/2;
+            return true;
+        }
+        return false;
     }
 }

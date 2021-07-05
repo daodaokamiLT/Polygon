@@ -59,6 +59,10 @@ struct extreme_edge_t{
         id = idcounterE;
         ++idcounterE;
     }
+    extreme_edge_t(){
+        id = idcounterE;
+        ++idcounterE;
+    }
     private:
         static std::atomic_ullong idcounterE;
 };

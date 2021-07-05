@@ -8,6 +8,7 @@
  * 
  * 
 */
+
 namespace polygon{
     template <class T>
     bool MonotoneChain<T>::GetMidEdge(extreme_edge_t<T>& midedge, MonotoneChain<T>& monochan_before, MonotoneChain<T>& monochain_after){
@@ -23,12 +24,16 @@ namespace polygon{
         }
         // 边数比点数少1
         int mid = (int)(size-1)/2;
-        GetEdge(midedge, midedge);
+        bool issucc= this->GetEdge(mid, midedge);
+        if(!issucc){
+            printf("error, failed GetEdge.\n");
+            exit(-1);
+        }
         for(int i=0; i<=mid; ++i){
-            monochan_before.emplace_back(points_chain[i]);
+            monochan_before.points_chain.emplace_back(points_chain[i]);
         }
         for(int i=mid+1; i<size; ++i){
-            monochain_after.emplace_back(points_chain[i]);
+            monochain_after.points_chain.emplace_back(points_chain[i]);
         }
     }
 
@@ -49,8 +54,8 @@ namespace polygon{
                 max_x = monochain.points_chain[i]->x;
                 maxx_index = i;
             }
-            if(max_y < monochain.points_chain[i]->x){
-                max_y = monochain.points_chain[i]->x;
+            if(max_y < monochain.points_chain[i]->y){
+                max_y = monochain.points_chain[i]->y;
                 maxy_index = i;
             }   
         }
@@ -78,11 +83,11 @@ namespace polygon{
         linepoint2d_t<T> linepoint2d_fromL1st_xbase_leftest(0, false), linepoint2d_fromL1st_xbase_rightest(0, false), linepoint2d_fromL1st_xbase_topest(0, false), linepoint2d_fromL1st_xbase_bottomest(0, true);
         findextreme(leftfirst_monochain_xbase_, linepoint2d_fromL1st_xbase_leftest, linepoint2d_fromL1st_xbase_rightest, linepoint2d_fromL1st_xbase_topest, linepoint2d_fromL1st_xbase_bottomest);
         
-        linepoint2d_t<T>::UpdateMonoChainId();
+        linepoint2d_t<T>::UpdateCounter();
         
         linepoint2d_t<T> linepoint2d_fromR1st_xbase_leftest(1, false), linepoint2d_fromR1st_xbase_rightest(1, false), linepoint2d_fromR1st_xbase_topest(1, false), linepoint2d_fromR1st_xbase_bottomest(1, true);
         findextreme(rightfirst_monochain_xbase_, linepoint2d_fromR1st_xbase_leftest, linepoint2d_fromR1st_xbase_rightest, linepoint2d_fromR1st_xbase_topest, linepoint2d_fromR1st_xbase_bottomest);
-        linepoint2d_t<T>::UpdateMonoChainId();
+        linepoint2d_t<T>::UpdateCounter();
         // check
         if(linepoint2d_fromL1st_xbase_leftest.point2dptr->x != linepoint2d_fromR1st_xbase_leftest.point2dptr->x || linepoint2d_fromL1st_xbase_rightest.point2dptr->x != linepoint2d_fromR1st_xbase_rightest.point2dptr->x){
             printf("error, the first extreme points get error, same polygon leftest and rightest x is not same.\n");
@@ -92,11 +97,11 @@ namespace polygon{
         // second polygon
         linepoint2d_t<T> linepoint2d_fromL2nd_xbase_leftest(2, false), linepoint2d_fromL2nd_xbase_rightest(2, false), linepoint2d_fromL2nd_xbase_topest(2, false), linepoint2d_fromL2nd_xbase_bottomest(2, true);
         findextreme(leftsecond_monochain_xbase_, linepoint2d_fromL2nd_xbase_leftest, linepoint2d_fromL2nd_xbase_rightest, linepoint2d_fromL2nd_xbase_topest, linepoint2d_fromL2nd_xbase_bottomest);
-        linepoint2d_t<T>::UpdateMonoChainId();
+        linepoint2d_t<T>::UpdateCounter();
 
         linepoint2d_t<T> linepoint2d_fromR2nd_xbase_leftest(3, false), linepoint2d_fromR2nd_xbase_rightest(3, false), linepoint2d_fromR2nd_xbase_topest(3, false), linepoint2d_fromR2nd_xbase_bottomest(3, true);
         findextreme(rightsecond_monochain_xbase_, linepoint2d_fromR2nd_xbase_leftest, linepoint2d_fromR2nd_xbase_rightest, linepoint2d_fromR2nd_xbase_topest, linepoint2d_fromR2nd_xbase_bottomest);
-        linepoint2d_t<T>::UpdateMonoChainId();
+        linepoint2d_t<T>::UpdateCounter();
         
         if(linepoint2d_fromL2nd_xbase_leftest.point2dptr->x != linepoint2d_fromR2nd_xbase_leftest.point2dptr->x || linepoint2d_fromL2nd_xbase_rightest.point2dptr->x != linepoint2d_fromR2nd_xbase_rightest.point2dptr->x){
             printf("error, the second extreme points get error, same polygon leftest and rightest x is not same.\n");
@@ -106,98 +111,102 @@ namespace polygon{
         // ----- ybase
         linepoint2d_t<T> linepoint2d_fromL1st_ybase_leftest(4, false), linepoint2d_fromL1st_ybase_rightest(4, false), linepoint2d_fromL1st_ybase_topest(4, false), linepoint2d_fromL1st_ybase_bottomest(4, true);
         findextreme(leftfirst_monochain_ybase_, linepoint2d_fromL1st_ybase_leftest, linepoint2d_fromL1st_ybase_rightest, linepoint2d_fromL1st_ybase_topest, linepoint2d_fromL1st_ybase_bottomest);
-        linepoint2d_t<T>::UpdateMonoChainId();
+        linepoint2d_t<T>::UpdateCounter();
 
         linepoint2d_t<T> linepoint2d_fromR1st_ybase_leftest(5, false), linepoint2d_fromR1st_ybase_rightest(5, false), linepoint2d_fromR1st_ybase_topest(5, false), linepoint2d_fromR1st_ybase_bottomest(5, true);
         findextreme(rightfirst_monochain_ybase_, linepoint2d_fromR1st_ybase_leftest, linepoint2d_fromR1st_ybase_rightest, linepoint2d_fromR1st_ybase_topest, linepoint2d_fromR1st_ybase_bottomest);
-        linepoint2d_t<T>::UpdateMonoChainId();
+        linepoint2d_t<T>::UpdateCounter();
+
         if(linepoint2d_fromL1st_ybase_topest.point2dptr->y != linepoint2d_fromR1st_ybase_topest.point2dptr->y || linepoint2d_fromL1st_ybase_bottomest.point2dptr->y != linepoint2d_fromR1st_ybase_bottomest.point2dptr->y){
             printf("error, the first extreme points get error, same polygon topest and bottomest y is not same.\n");
+            printf("linepoint2d_fromL1st_ybase_topest.point2dptr->y %lf != %lf linepoint2d_fromR1st_ybase_topest.point2dptr->y || linepoint2d_fromL1st_ybase_bottomest.point2dptr->y %lf != %lf linepoint2d_fromR1st_ybase_bottomest.point2dptr->y.\n", linepoint2d_fromL1st_ybase_topest.point2dptr->y, linepoint2d_fromR1st_ybase_topest.point2dptr->y,
+                                        linepoint2d_fromL1st_ybase_bottomest.point2dptr->y, linepoint2d_fromR1st_ybase_bottomest.point2dptr->y);
             exit(-1);
         }
 
         // ----- second ybase
         linepoint2d_t<T> linepoint2d_fromL2nd_ybase_leftest(6, false), linepoint2d_fromL2nd_ybase_rightest(6, false), linepoint2d_fromL2nd_ybase_topest(6, false), linepoint2d_fromL2nd_ybase_bottomest(6, true);
         findextreme(leftsecond_monochain_ybase_, linepoint2d_fromL2nd_ybase_leftest, linepoint2d_fromL2nd_ybase_rightest, linepoint2d_fromL2nd_ybase_topest, linepoint2d_fromL2nd_ybase_bottomest);
-        linepoint2d_t<T>::UpdateMonoChainId();
+        linepoint2d_t<T>::UpdateCounter();
 
         linepoint2d_t<T> linepoint2d_fromR2nd_ybase_leftest(7, false), linepoint2d_fromR2nd_ybase_rightest(7, false), linepoint2d_fromR2nd_ybase_topest(7, false), linepoint2d_fromR2nd_ybase_bottomest(7, true);
         findextreme(rightsecond_monochain_ybase_, linepoint2d_fromR2nd_ybase_leftest, linepoint2d_fromR2nd_ybase_rightest, linepoint2d_fromR2nd_ybase_topest, linepoint2d_fromR2nd_ybase_bottomest);
-        linepoint2d_t<T>::UpdateMonoChainId();
+        linepoint2d_t<T>::UpdateCounter();
         
         if(linepoint2d_fromL2nd_ybase_topest.point2dptr->y != linepoint2d_fromR2nd_ybase_topest.point2dptr->y || linepoint2d_fromL2nd_ybase_bottomest.point2dptr->y != linepoint2d_fromR2nd_ybase_bottomest.point2dptr->y){
             printf("error, the second extreme points get error, same polygon topest and bottomest y is not same.\n");
             exit(-1);
         }
-        sorted_extremelinepoint2d_xbase_hor_.clear();
-        sorted_extremelinepoint2d_xbase_hor_.emplace_back(linepoint2d_fromL1st_xbase_leftest);
-        sorted_extremelinepoint2d_xbase_hor_.emplace_back(linepoint2d_fromL1st_xbase_rightest);
-        sorted_extremelinepoint2d_xbase_hor_.emplace_back(linepoint2d_fromL2nd_xbase_leftest);
-        sorted_extremelinepoint2d_xbase_hor_.emplace_back(linepoint2d_fromL2nd_xbase_rightest);
-        std::sort(sorted_extremelinepoint2d_xbase_hor_.begin(), sorted_extremelinepoint2d_xbase_hor_.end(), Compare_Xmin_minypre);
+    
+        sorted_extermelinepoint2d_ybase_vel_.clear();
+        sorted_extermelinepoint2d_ybase_vel_.emplace_back(linepoint2d_fromL1st_ybase_topest);
+        sorted_extermelinepoint2d_ybase_vel_.emplace_back(linepoint2d_fromL1st_ybase_bottomest);
+        sorted_extermelinepoint2d_ybase_vel_.emplace_back(linepoint2d_fromL2nd_ybase_topest);
+        sorted_extermelinepoint2d_ybase_vel_.emplace_back(linepoint2d_fromL2nd_ybase_bottomest);
+        std::sort(sorted_extermelinepoint2d_ybase_vel_.begin(), sorted_extermelinepoint2d_ybase_vel_.end(), Compare_Ymin_minxpre<T>);
 
         sorted_extremelinepoint2d_xbase_vel00_.clear();
         sorted_extremelinepoint2d_xbase_vel00_.emplace_back(linepoint2d_fromL1st_xbase_topest);
         sorted_extremelinepoint2d_xbase_vel00_.emplace_back(linepoint2d_fromL1st_xbase_bottomest);
         sorted_extremelinepoint2d_xbase_vel00_.emplace_back(linepoint2d_fromL2nd_xbase_topest);
         sorted_extremelinepoint2d_xbase_vel00_.emplace_back(linepoint2d_fromL2nd_xbase_bottomest);
-        std::sort(sorted_extremelinepoint2d_xbase_vel00_.begin(), sorted_extremelinepoint2d_xbase_vel00_.end(), Compare_Ymin_minxpre);
+        std::sort(sorted_extremelinepoint2d_xbase_vel00_.begin(), sorted_extremelinepoint2d_xbase_vel00_.end(), Compare_Ymin_minxpre<T>);
         
         sorted_extremelinepoint2d_xbase_vel01_.clear();
         sorted_extremelinepoint2d_xbase_vel01_.emplace_back(linepoint2d_fromL1st_xbase_topest);
         sorted_extremelinepoint2d_xbase_vel01_.emplace_back(linepoint2d_fromL1st_xbase_bottomest);
         sorted_extremelinepoint2d_xbase_vel01_.emplace_back(linepoint2d_fromR2nd_xbase_topest);
         sorted_extremelinepoint2d_xbase_vel01_.emplace_back(linepoint2d_fromR2nd_xbase_bottomest);
-        std::sort(sorted_extremelinepoint2d_xbase_vel01_.begin(), sorted_extremelinepoint2d_xbase_vel01_.end(), Compare_Ymin_minxpre);
+        std::sort(sorted_extremelinepoint2d_xbase_vel01_.begin(), sorted_extremelinepoint2d_xbase_vel01_.end(), Compare_Ymin_minxpre<T>);
 
         sorted_extremelinepoint2d_xbase_vel10_.clear();
         sorted_extremelinepoint2d_xbase_vel10_.emplace_back(linepoint2d_fromR1st_xbase_topest);
         sorted_extremelinepoint2d_xbase_vel10_.emplace_back(linepoint2d_fromR1st_xbase_bottomest);
         sorted_extremelinepoint2d_xbase_vel10_.emplace_back(linepoint2d_fromL2nd_xbase_topest);
         sorted_extremelinepoint2d_xbase_vel10_.emplace_back(linepoint2d_fromL2nd_xbase_bottomest);
-        std::sort(sorted_extremelinepoint2d_xbase_vel10_.begin(), sorted_extremelinepoint2d_xbase_vel10_.end(), Compare_Ymin_minxpre);
+        std::sort(sorted_extremelinepoint2d_xbase_vel10_.begin(), sorted_extremelinepoint2d_xbase_vel10_.end(), Compare_Ymin_minxpre<T>);
 
         sorted_extremelinepoint2d_xbase_vel11_.clear();
         sorted_extremelinepoint2d_xbase_vel11_.emplace_back(linepoint2d_fromR1st_xbase_topest);
         sorted_extremelinepoint2d_xbase_vel11_.emplace_back(linepoint2d_fromR1st_xbase_bottomest);
         sorted_extremelinepoint2d_xbase_vel11_.emplace_back(linepoint2d_fromR2nd_xbase_topest);
         sorted_extremelinepoint2d_xbase_vel11_.emplace_back(linepoint2d_fromR2nd_xbase_bottomest);
-        std::sort(sorted_extremelinepoint2d_xbase_vel11_.begin(), sorted_extremelinepoint2d_xbase_vel11_.end(), Compare_Ymin_minxpre);
+        std::sort(sorted_extremelinepoint2d_xbase_vel11_.begin(), sorted_extremelinepoint2d_xbase_vel11_.end(), Compare_Ymin_minxpre<T>);
 
-        sorted_extermelinepoint2d_ybase_vel_.clear();
-        sorted_extermelinepoint2d_ybase_vel_.emplace_back(linepoint2d_fromL1st_ybase_topest);
-        sorted_extermelinepoint2d_ybase_vel_.emplace_back(linepoint2d_fromL1st_ybase_bottomest);
-        sorted_extermelinepoint2d_ybase_vel_.emplace_back(linepoint2d_fromL2nd_ybase_topest);
-        sorted_extermelinepoint2d_ybase_vel_.emplace_back(linepoint2d_fromL2nd_ybase_bottomest);
-        std::sort(sorted_extermelinepoint2d_ybase_vel_.begin(), sorted_extermelinepoint2d_ybase_vel_.end(), Compare_Ymin_minxpre);
+        sorted_extremelinepoint2d_xbase_hor_.clear();
+        sorted_extremelinepoint2d_xbase_hor_.emplace_back(linepoint2d_fromL1st_xbase_leftest);
+        sorted_extremelinepoint2d_xbase_hor_.emplace_back(linepoint2d_fromL1st_xbase_rightest);
+        sorted_extremelinepoint2d_xbase_hor_.emplace_back(linepoint2d_fromL2nd_xbase_leftest);
+        sorted_extremelinepoint2d_xbase_hor_.emplace_back(linepoint2d_fromL2nd_xbase_rightest);
+        std::sort(sorted_extremelinepoint2d_xbase_hor_.begin(), sorted_extremelinepoint2d_xbase_hor_.end(), Compare_Xmin_minypre<T>);
 
         sorted_extremelinepoint2d_ybase_hor00_.clear();
         sorted_extremelinepoint2d_ybase_hor00_.emplace_back(linepoint2d_fromL1st_ybase_leftest);
         sorted_extremelinepoint2d_ybase_hor00_.emplace_back(linepoint2d_fromL1st_ybase_rightest);
         sorted_extremelinepoint2d_ybase_hor00_.emplace_back(linepoint2d_fromL2nd_ybase_leftest);
         sorted_extremelinepoint2d_ybase_hor00_.emplace_back(linepoint2d_fromL2nd_ybase_rightest);
-        std::sort(sorted_extremelinepoint2d_ybase_hor00_.begin(), sorted_extremelinepoint2d_ybase_hor00_.end(), Compare_Xmin_minypre);
+        std::sort(sorted_extremelinepoint2d_ybase_hor00_.begin(), sorted_extremelinepoint2d_ybase_hor00_.end(), Compare_Xmin_minypre<T>);
         
         sorted_extremelinepoint2d_ybase_hor01_.clear();
         sorted_extremelinepoint2d_ybase_hor01_.emplace_back(linepoint2d_fromL1st_ybase_leftest);
         sorted_extremelinepoint2d_ybase_hor01_.emplace_back(linepoint2d_fromL1st_ybase_rightest);
         sorted_extremelinepoint2d_ybase_hor01_.emplace_back(linepoint2d_fromR2nd_ybase_leftest);
         sorted_extremelinepoint2d_ybase_hor01_.emplace_back(linepoint2d_fromR2nd_ybase_rightest);
-        std::sort(sorted_extremelinepoint2d_ybase_hor01_.begin(), sorted_extremelinepoint2d_ybase_hor01_.end(), Compare_Xmin_minypre);
+        std::sort(sorted_extremelinepoint2d_ybase_hor01_.begin(), sorted_extremelinepoint2d_ybase_hor01_.end(), Compare_Xmin_minypre<T>);
         
         sorted_extremelinepoint2d_ybase_hor10_.clear();
         sorted_extremelinepoint2d_ybase_hor10_.emplace_back(linepoint2d_fromR1st_ybase_leftest);
         sorted_extremelinepoint2d_ybase_hor10_.emplace_back(linepoint2d_fromR1st_ybase_rightest);
         sorted_extremelinepoint2d_ybase_hor10_.emplace_back(linepoint2d_fromL2nd_ybase_leftest);
         sorted_extremelinepoint2d_ybase_hor10_.emplace_back(linepoint2d_fromL2nd_ybase_rightest);
-        std::sort(sorted_extremelinepoint2d_ybase_hor10_.begin(), sorted_extremelinepoint2d_ybase_hor10_.end(), Compare_Xmin_minypre);
+        std::sort(sorted_extremelinepoint2d_ybase_hor10_.begin(), sorted_extremelinepoint2d_ybase_hor10_.end(), Compare_Xmin_minypre<T>);
         
         sorted_extremelinepoint2d_ybase_hor11_.clear();
         sorted_extremelinepoint2d_ybase_hor11_.emplace_back(linepoint2d_fromR1st_ybase_leftest);
         sorted_extremelinepoint2d_ybase_hor11_.emplace_back(linepoint2d_fromR1st_ybase_rightest);
         sorted_extremelinepoint2d_ybase_hor11_.emplace_back(linepoint2d_fromR2nd_ybase_leftest);
         sorted_extremelinepoint2d_ybase_hor11_.emplace_back(linepoint2d_fromR2nd_ybase_rightest);
-        std::sort(sorted_extremelinepoint2d_ybase_hor11_.begin(), sorted_extremelinepoint2d_ybase_hor11_.end(), Compare_Xmin_minypre);
+        std::sort(sorted_extremelinepoint2d_ybase_hor11_.begin(), sorted_extremelinepoint2d_ybase_hor11_.end(), Compare_Xmin_minypre<T>);
         
         // 在四个队列中，进行排序查看是否有可能的重合部分， 若有则进行递归求解。
     }
@@ -226,6 +235,7 @@ namespace polygon{
     // }*/
 
     // we think the monochain 
+
     template <class T>
     bool PolygonIntersecting<T>::PotentionIntersection(const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_hor, const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_vel){ // sort 肯定是偶数的
         // monochain has
@@ -233,10 +243,11 @@ namespace polygon{
             printf("please init valid sorted extremelinepoints, before use this method.\n");
             exit(-1);
         }
-        if(!sorted_extremelinepoint2d_hor[0].isleft || !sorted_extremelinepoint2d_vel[0].isleft){
-            printf("the fist element must be tag = left.\n");
-            exit(-1);
-        }
+        // //  不一定有 isleft 
+        // if(!sorted_extremelinepoint2d_hor[0].isleft || !sorted_extremelinepoint2d_vel[0].isleft){
+        //     printf("the fist element must be tag = left.\n");
+        //     exit(-1);
+        // }
         bool possible_xbase = false;
         // 永远都是两条边，四个点
         if(sorted_extremelinepoint2d_hor[0].tag == sorted_extremelinepoint2d_hor[1].tag &&
@@ -949,6 +960,7 @@ namespace polygon{
     template <class T>
     bool PolygonIntersecting<T>::HasIntersection(const bool& usexorybase){
         // 自己选择 // 0 x  12 y
+        OrderLineEndPoints();
         potention_intersection_tags_.clear();
         bool possible = false;
         if(usexorybase){
@@ -1030,55 +1042,58 @@ namespace polygon{
             return ;
         }
         for(auto tag : potention_intersection_tags_){
-            switch (tag)
+            if (tag == "000")
             {
-            case "000":
                 /* code */
                 CalIntersectionBetweenTwoMonochainLine(leftfirst_monochain_xbase_, leftsecond_monochain_xbase_, 0, 0);
-                break;
-            case "001":
+            }
+            if (tag == "001")
+            {
                 /* code */
                 CalIntersectionBetweenTwoMonochainLine(leftfirst_monochain_xbase_, rightsecond_monochain_xbase_, 0, 0);
-                break;
-            case "010":
+            }
+            if (tag == "010")
+            {
                 /* code */
                 CalIntersectionBetweenTwoMonochainLine(rightfirst_monochain_xbase_, leftsecond_monochain_xbase_, 0, 0);
-                break;
-            case "011":
+            }
+            if (tag == "011")
+            {
                 /* code */
                 CalIntersectionBetweenTwoMonochainLine(rightfirst_monochain_xbase_, rightsecond_monochain_xbase_, 0, 0);
-                break;
-            case "100":
+            }
+            if (tag == "100")
+            {
                 /* code */
                 CalIntersectionBetweenTwoMonochainLine(leftfirst_monochain_ybase_, leftsecond_monochain_ybase_, 0, 0);
-                break;
-            case "101":
+            }
+            if (tag == "101")
+            {
                 /* code */
                 CalIntersectionBetweenTwoMonochainLine(leftfirst_monochain_ybase_, rightsecond_monochain_ybase_, 0, 0);
-                break;
-            case "110":
+            }
+            if (tag == "110")
+            {
                 /* code */
                 CalIntersectionBetweenTwoMonochainLine(rightfirst_monochain_ybase_, leftsecond_monochain_ybase_, 0, 0);
-                break;
-            case "111":
+            }
+            if (tag == "111")
+            {
                 /* code */
                 CalIntersectionBetweenTwoMonochainLine(rightfirst_monochain_ybase_, rightsecond_monochain_ybase_, 0, 0);
-                break;
-            default:
-                break;
             }
         }
     }
-
+    
     template <class T>
-    void PolygonIntersecting<T>::CalIntersectionBetweenTwoMonochainLine(const MonotoneChain<T>& chain0, const MonotoneChain<T>& chain1, int start0, int start1){
+    void PolygonIntersecting<T>::CalIntersectionBetweenTwoMonochainLine(MonotoneChain<T>& chain0, MonotoneChain<T>& chain1, int start0, int start1){
         if(chain0.points_chain.size() < 3 && chain1.points_chain.size() < 3){// 都只剩下一条边的时候
             // 判断当前是否存在交点，并计算交点位置
             extreme_edge_t<T> midedge0, midedge1;
-            midedge0.p_start = chain0[0];
-            midedge0.p_end = chain0[1];
-            midedge1.p_start = chain1[0];
-            midedge1.p_end = chain1[1];
+            midedge0.p_start = chain0.points_chain[0];
+            midedge0.p_end = chain0.points_chain[1];
+            midedge1.p_start = chain1.points_chain[0];
+            midedge1.p_end = chain1.points_chain[1];
             
             if(IsLineIntersecting(midedge0, midedge1)){
                 // has ， find the point and save into vector
@@ -1115,17 +1130,34 @@ namespace polygon{
                     delete inter;
                 }
             }
-            if (PotentionIntersection(leftchain0, leftchain1))
-                CalIntersectionBetweenTwoMonochainLine(leftchain0, leftchain1);
-            if (PotentionIntersection(leftchain0, rightchain1))
-                CalIntersectionBetweenTwoMonochainLine(leftchain0, rightchain1);
-            if (PotentionIntersection(rightchain0, leftchain1))
-                CalIntersectionBetweenTwoMonochainLine(rightchain0, leftchain1);
-            if (PotentionIntersection(rightchain1, rightchain1))
-                CalIntersectionBetweenTwoMonochainLine(rightchain0, rightchain1);
-            
+            std::vector<linepoint2d_t<T>> leftchainlinepoints0, rightchainlinepoints0, leftchainlinepoints1, rightchainlinepoints1;
+            for(int i=0; i<leftchain0.points_chain.size(); ++i){
+                leftchainlinepoints0.emplace_back(linepoint2d_t<T>(leftchain0.points_chain[i], 0, true, false));
+            }
+            linepoint2d_t<T>::UpdateCounter();
+            for(int i=0; i<rightchain0.points_chain.size(); ++i){
+                rightchainlinepoints0.emplace_back(linepoint2d_t<T>(rightchain0.points_chain[i], 1, false, false));
+            }
+            linepoint2d_t<T>::UpdateCounter();
+            for(int i=0; i<leftchain1.points_chain.size(); ++i){
+                leftchainlinepoints1.emplace_back(linepoint2d_t<T>(leftchain1.points_chain[i], 2, true, false));
+            }
+            linepoint2d_t<T>::UpdateCounter();
+            for(int i=0; i<rightchain1.points_chain.size(); ++i){
+                rightchainlinepoints1.emplace_back(linepoint2d_t<T>(rightchain1.points_chain[i], 3, false, false));
+            }
+            // 这里的问题是：
+            if (PotentionIntersection(leftchainlinepoints0, leftchainlinepoints1))
+                CalIntersectionBetweenTwoMonochainLine(leftchain0, leftchain1, 0, 0);
+            if (PotentionIntersection(leftchainlinepoints0, rightchainlinepoints1))
+                CalIntersectionBetweenTwoMonochainLine(leftchain0, rightchain1, 0, 0);
+            if (PotentionIntersection(rightchainlinepoints0, leftchainlinepoints1))
+                CalIntersectionBetweenTwoMonochainLine(rightchain0, leftchain1, 0, 0);
+            if (PotentionIntersection(rightchainlinepoints1, rightchainlinepoints1))
+                CalIntersectionBetweenTwoMonochainLine(rightchain0, rightchain1, 0, 0);
             return;
         }
+
     }
     template <class T>
     bool CalRealIntersectionPosition(const extreme_edge_t<T>& edge0, const extreme_edge_t<T>& edge1, point2d_t<T>* inter){
@@ -1134,7 +1166,7 @@ namespace polygon{
         const point2d_t<T>* pc = edge1.p_start;
         const point2d_t<T>* pd = edge1.p_end;
 
-        Eigen::Matrix4d A = Eigen::Matrix4d::Zero();
+        Eigen::Matrix2d A = Eigen::Matrix2d::Zero();
         A(0, 0) = pb->x - pa->x; A(0, 1) = pc->x - pd->x;
         A(1, 0) = pb->y - pa->y; A(1, 1) = pc->y - pd->y;
         if(A.determinant() <= 0){

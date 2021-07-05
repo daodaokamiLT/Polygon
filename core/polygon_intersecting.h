@@ -80,7 +80,7 @@ namespace polygon{
     }
 
     template <class T>
-    bool IsLineIntersecting(const extreme_edge_t<T>& segment0, const extreme_edge_t<T>&segment1){
+    bool IsLineIntersecting(const extreme_edge_t<T>& segment0, extreme_edge_t<T>&segment1){
         bool flag_endpoint0 = false, flag_endpoint1 = false;
         if(segment0.p_start->Equal(segment1.p_start) || segment0.p_start->Equal(segment1.p_end)){
             printf("segment0 is intersecting with segment1 at endpoint start.\n");
@@ -98,8 +98,8 @@ namespace polygon{
             return true;
         }
         
-        bool seg0_seg1s = ToLeftTest(segment0.p_start, segment0.p_end, segment1.p_start);
-        bool seg0_seg1e = ToLeftTest(segment0.p_start, segment0.p_end, segment1.p_end);
+        bool seg0_seg1s = ToLeftTest_ISOL(segment0.p_start, segment0.p_end, segment1.p_start);
+        bool seg0_seg1e = ToLeftTest_ISOL(segment0.p_start, segment0.p_end, segment1.p_end);
         bool flag0 = false;
         if(seg0_seg1s ^ seg0_seg1e){
             flag0 = true;
@@ -108,15 +108,14 @@ namespace polygon{
             return false;
         }
 
-        bool seg1_seg0s = ToLeftTest(segment1.p_start, segment1.p_end, segment0.p_start);
-        bool seg1_seg0e = ToLeftTest(segment1.p_start, segment1.p_end, segment0.p_end);
+        bool seg1_seg0s = ToLeftTest_ISOL(segment1.p_start, segment1.p_end, segment0.p_start);
+        bool seg1_seg0e = ToLeftTest_ISOL(segment1.p_start, segment1.p_end, segment0.p_end);
         if(seg1_seg0s ^ seg1_seg0e && flag0){
             return true;
         }
         else{
             return false;
         }
-        // return false;
     }
 
     // may use the zig-zag method to find the bridge first 
@@ -159,6 +158,10 @@ namespace polygon{
             if(updatetag)
                 ++counterLP;
         }
+        static void UpdateCounter(){
+            ++counterLP;
+        }
+
         point2d_t<T>* point2dptr = nullptr;
         bool isleft = true;
         unsigned long long tag = 0ull;
@@ -222,7 +225,6 @@ namespace polygon{
             void CalBridge();
             void SplitPolygon2MonotoneChain();// can get four chain, than use these four chain to cal if has interface
             void GetFirstMonoChain(std::vector<point2d_t<T>*>& leftchain, std::vector<point2d_t<T>*>& rightchain);
-
             void GetFirstMonoChainXbase(std::vector<point2d_t<T>*>& leftchain, std::vector<point2d_t<T>*>& rightchain);
             void GetSecondMonoChainXbase(std::vector<point2d_t<T>*>& leftchain, std::vector<point2d_t<T>*>& rightchain);
             void GetFirstMonoChainYbase(std::vector<point2d_t<T>*>& leftchain, std::vector<point2d_t<T>*>& rightchain);
@@ -283,6 +285,7 @@ namespace polygon{
             void OrderLineEndPoints();
             bool PotentionIntersection(const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d);
             bool PotentionIntersection(const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_hor, const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_vel);
+
             // bool PotentionIntersection(const MonotoneChain<T>& monochain0, const MonotoneChain<T>& monochain1, const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_hor, const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_vel);
             std::vector<linepoint2d_t<T>> sorted_extremelinepoint2d_xbase_hor_, sorted_extremelinepoint2d_xbase_vel00_, sorted_extremelinepoint2d_xbase_vel01_, sorted_extremelinepoint2d_xbase_vel10_, sorted_extremelinepoint2d_xbase_vel11_;
             std::vector<linepoint2d_t<T>> sorted_extremelinepoint2d_ybase_hor00_, sorted_extremelinepoint2d_ybase_hor01_, sorted_extremelinepoint2d_ybase_hor10_, sorted_extremelinepoint2d_ybase_hor11_, sorted_extermelinepoint2d_ybase_vel_; 
@@ -297,8 +300,8 @@ namespace polygon{
             */
             std::vector<std::string> potention_intersection_tags_;
             std::vector<std::pair<extremeedge_index_t, point2d_t<T>*>> intersections_; // 存储的是在monochain中的位置和 对应的点位置
-
-            void CalIntersectionBetweenTwoMonochainLine(const MonotoneChain<T>& chain0, const MonotoneChain<T>& chain1, int start0, int start1); 
+            
+            void CalIntersectionBetweenTwoMonochainLine(MonotoneChain<T>& chain0, MonotoneChain<T>& chain1, int start0, int start1); 
     };
 }
 

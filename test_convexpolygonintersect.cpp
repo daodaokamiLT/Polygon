@@ -126,7 +126,7 @@ int main(int argc, char* argv[]){
     }
 
     // polygonIntersecting
-
+    
     created_points.clear();
     copyshift_points.clear();
     return 0;

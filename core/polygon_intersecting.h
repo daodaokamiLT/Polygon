@@ -11,11 +11,12 @@ namespace polygon{
         int monochainid = 0;
         bool GetMidEdge(extreme_edge_t<T>& midedge, MonotoneChain<T>& monochan_before, MonotoneChain<T>& monochain_after);
         bool GetEdge(int index, extreme_edge_t<T>& exedge){// start is 0
-            if(index > points_chain.size()-2){
+            if(index > points_chain.size()-1 || index < 0){
                 return false;
             }
             exedge.p_start = points_chain[index];
             exedge.p_end = points_chain[index+1];
+            return true;
         }
         MonotoneChain() = default;
         MonotoneChain(int mcid):monochainid(mcid){}
@@ -129,14 +130,12 @@ namespace polygon{
     struct linepoint2d_t{
         linepoint2d_t() = default;
 
-        linepoint2d_t(const bool& updatetag){
-            if(updatetag)
-                ++counterLP;
+        linepoint2d_t(const int& countLP){
+            tag = countLP;
         }
-        linepoint2d_t(const int& monochaintype, const bool& updatetag){
+        linepoint2d_t(const int& monochaintype, const int& countLP){
             monochainid = monochaintype;
-            if(updatetag)
-                ++counterLP;
+            tag = countLP;
         }
         /**
          * @brief monochain type has 0, 1, 2, 3, 4, 5, 6, 7
@@ -150,32 +149,23 @@ namespace polygon{
          * 6 is monochain type is second_leftmonochain_ybase
          * 7 is monochain type is second_rightmonochain_ybase
         */
-        linepoint2d_t(point2d_t<T>* ptr, int monochaintype, const bool& il, const bool& updatetag = true){
+        linepoint2d_t(point2d_t<T>* ptr, int monochaintype, const bool& il, const int& counterLP = 0){
             point2dptr = ptr;
             tag = counterLP;
             isleft = il;
             monochainid = monochaintype;
-            if(updatetag)
-                ++counterLP;
-        }
-        static void UpdateCounter(){
-            ++counterLP;
         }
 
         point2d_t<T>* point2dptr = nullptr;
         bool isleft = true;
         unsigned long long tag = 0ull;
         unsigned long long monochainid;
-        private:
-            static std::atomic_ullong counterLP;// 条直线有关于当前vector中排列的索引序号，设置成tag，多个点可以是一个tag    
     };
-    template <class T>
-    std::atomic_ullong linepoint2d_t<T>::counterLP = {0};
 
     template <class T>
     bool Compare_Xmin_minypre(const linepoint2d_t<T>& lp0, const linepoint2d_t<T>& lp1){
         bool flag = false;
-        if(lp0.point2dptr->x == lp1.point2dptr->x){
+        if(lp0.point2dptr->x < lp1.point2dptr->x){
             flag = true;
         }
         else if(lp0.point2dptr->x == lp1.point2dptr->x){
@@ -193,7 +183,7 @@ namespace polygon{
     template <class T>
     bool Compare_Ymin_minxpre(const linepoint2d_t<T>& lp0, const linepoint2d_t<T>& lp1){
         bool flag = false;
-        if(lp0.point2dptr->y == lp1.point2dptr->y){
+        if(lp0.point2dptr->y < lp1.point2dptr->y){
             flag = true;
         }
         else if(lp0.point2dptr->y == lp1.point2dptr->y){

@@ -1162,23 +1162,23 @@ namespace polygon{
                 }
             }
             std::vector<linepoint2d_t<T>> leftchainlinepoints0, rightchainlinepoints0, leftchainlinepoints1, rightchainlinepoints1;
+            // 由于不知道tag 所以不能快速的进行x extremepoints 和 yextremepoints的分离。
             for(int i=0; i<leftchain0.points_chain.size(); ++i){
-                leftchainlinepoints0.emplace_back(linepoint2d_t<T>(leftchain0.points_chain[i], 0, true, false));
+                
             }
             
             for(int i=0; i<rightchain0.points_chain.size(); ++i){
-                rightchainlinepoints0.emplace_back(linepoint2d_t<T>(rightchain0.points_chain[i], 1, false, false));
+                
             }
             
             for(int i=0; i<leftchain1.points_chain.size(); ++i){
-                leftchainlinepoints1.emplace_back(linepoint2d_t<T>(leftchain1.points_chain[i], 2, true, false));
+                
             }
             
             for(int i=0; i<rightchain1.points_chain.size(); ++i){
-                rightchainlinepoints1.emplace_back(linepoint2d_t<T>(rightchain1.points_chain[i], 3, false, false));
+                
             }
             printf("run rePotentionIntersections intersections. leftchainlinepoints0,1 is (%d, %d).\n", (int)leftchainlinepoints0.size(), (int)leftchainlinepoints1.size());
-            
             // 这里的问题是： 这里是两个chain之间可能性的比较，要自己创建sorted points
             if (PotentionIntersection(leftchainlinepoints0, leftchainlinepoints1))
                 CalIntersectionBetweenTwoMonochainLine(leftchain0, leftchain1, 0, 0);

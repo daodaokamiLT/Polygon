@@ -79,11 +79,14 @@ int main(int argc, char* argv[]){
     polygonIntersecting.GetSecondMonoChainYbase(secondleftchain_ybase, secondrightchain_ybase);
 
     cv::Mat img_xbase = img.clone();
-    
+    printf("firstleft chain xbase size is %d.\n", (int)firstleftchain_xbase.size());
     for(int i=0; i<firstleftchain_xbase.size()-1; ++i){
+        printf("point is: %lf %lf -- %lf %lf.\n", firstleftchain_xbase[i]->x, firstleftchain_xbase[i]->y, firstleftchain_xbase[i+1]->x, firstleftchain_xbase[i+1]->y);
         cv::line(img_xbase, cv::Point2d(50+10*firstleftchain_xbase[i]->x, 550-10*firstleftchain_xbase[i]->y), cv::Point2d(50+10*firstleftchain_xbase[i+1]->x, 550-10*firstleftchain_xbase[i+1]->y), 255, 3);
     }
+    printf("firstright chain xbase size is %d.\n", (int)firstrightchain_xbase.size());
     for(int i=0; i<firstrightchain_xbase.size()-1; ++i){
+        printf("point is: %lf %lf -- %lf %lf.\n", firstrightchain_xbase[i]->x, firstrightchain_xbase[i]->y, firstrightchain_xbase[i+1]->x, firstrightchain_xbase[i+1]->y);
         cv::line(img_xbase, cv::Point2d(50+10*firstrightchain_xbase[i]->x, 550-10*firstrightchain_xbase[i]->y), cv::Point2d(50+10*firstrightchain_xbase[i+1]->x, 550-10*firstrightchain_xbase[i+1]->y), 100, 2);
     }
     for(int i=0; i<secondleftchain_xbase.size()-1; ++i){
@@ -92,15 +95,17 @@ int main(int argc, char* argv[]){
     for(int i=0; i<secondrightchain_xbase.size()-1; ++i){
         cv::line(img_xbase, cv::Point2d(50+10*secondrightchain_xbase[i]->x, 550-10*secondrightchain_xbase[i]->y), cv::Point2d(50+10*secondrightchain_xbase[i+1]->x, 550-10*secondrightchain_xbase[i+1]->y), 100, 2);
     }
+    cv::imshow("xbase split", img_xbase);
+
     cv::Mat img_ybase = img.clone();
-    // printf("firstleft chain ybase size is %d.\n", (int)firstleftchain_ybase.size());
+    printf("firstleft chain ybase size is %d.\n", (int)firstleftchain_ybase.size());
     for(int i=0; i<firstleftchain_ybase.size()-1; ++i){
-        // printf("point is: %lf %lf -- %lf %lf.\n", firstleftchain_ybase[i]->x, firstleftchain_ybase[i]->y, firstleftchain_ybase[i+1]->x, firstleftchain_ybase[i+1]->y);
+        printf("point is: %lf %lf -- %lf %lf.\n", firstleftchain_ybase[i]->x, firstleftchain_ybase[i]->y, firstleftchain_ybase[i+1]->x, firstleftchain_ybase[i+1]->y);
         cv::line(img_ybase, cv::Point2d(50+10*firstleftchain_ybase[i]->x, 550-10*firstleftchain_ybase[i]->y), cv::Point2d(50+10*firstleftchain_ybase[i+1]->x, 550-10*firstleftchain_ybase[i+1]->y), 255, 3);
     }
-    // printf("firstright chain ybase size is %d.\n", (int)firstrightchain_ybase.size());
+    printf("firstright chain ybase size is %d.\n", (int)firstrightchain_ybase.size());
     for(int i=0; i<firstrightchain_ybase.size()-1; ++i){
-        // printf("point is: %lf %lf -- %lf %lf.\n", firstrightchain_ybase[i]->x, firstrightchain_ybase[i]->y, firstrightchain_ybase[i+1]->x, firstrightchain_ybase[i+1]->y);
+        printf("point is: %lf %lf -- %lf %lf.\n", firstrightchain_ybase[i]->x, firstrightchain_ybase[i]->y, firstrightchain_ybase[i+1]->x, firstrightchain_ybase[i+1]->y);
         cv::line(img_ybase, cv::Point2d(50+10*firstrightchain_ybase[i]->x, 550-10*firstrightchain_ybase[i]->y), cv::Point2d(50+10*firstrightchain_ybase[i+1]->x, 550-10*firstrightchain_ybase[i+1]->y), 100, 2);
     }
     // printf("secondleft chain ybase size is %d.\n", (int)secondleftchain_ybase.size());
@@ -124,7 +129,14 @@ int main(int argc, char* argv[]){
     else{
         printf("hasn't polygon intersected.\n");
     }
-
+    std::vector<polygon::point2d_t<double>*> interpoints;
+    polygonIntersecting.GetIntersections(interpoints);
+    printf("intersection size is %d.\n", (int)interpoints.size());
+    for(auto ip : interpoints){
+        cv::circle(img_xbase, cv::Point2d(50+10*ip->x, 550-10*ip->y), 5, cv::Scalar(255), 2);
+    }
+    cv::imshow("xbase split", img_xbase);
+    cv::waitKey(0);
     // polygonIntersecting
     
     created_points.clear();

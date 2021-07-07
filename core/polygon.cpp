@@ -120,11 +120,11 @@ namespace polygon{
     template <class T>
     bool ToLeftTest_ISOL(const point2d_t<T>* p0, const point2d_t<T>* p1, const point2d_t<T>* p2){
         Eigen::Matrix3d det3 = Eigen::Matrix3d::Zero();
-        
-        double res = det3.determinant();
         det3(0,0) = (double)p0->x; det3(0,1) = (double)p0->y; det3(0,2) = 1;
         det3(1,0) = (double)p1->x; det3(1,1) = (double)p1->y; det3(1,2) = 1;
         det3(2,0) = (double)p2->x; det3(2,1) = (double)p2->y; det3(2,2) = 1;
+
+        double res = det3.determinant();
         if(res >= 0)
             return true;
         else

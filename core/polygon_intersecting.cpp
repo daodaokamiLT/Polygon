@@ -8,7 +8,6 @@
  * 
  * 
 */
-
 namespace polygon{
     template <class T>
     bool MonotoneChain<T>::GetMidEdge(extreme_edge_t<T>& midedge, MonotoneChain<T>& monochan_before, MonotoneChain<T>& monochain_after){
@@ -16,13 +15,13 @@ namespace polygon{
         int size = points_chain.size();
         printf("points chain size is %d.\n", size);
         if(size == 1){
-            //printf("error cannot create a edge.\n");
-            return false;
+            printf("error cannot create a edge and the chain never be 1 point, because that cannot create a line.\n");
+            exit(-1);
         }
         if(size == 2){
             midedge.p_start = points_chain[0];
             midedge.p_end = points_chain[1];
-            return false;
+            return true;
         }
         // 边数比点数少1
         int mid = (int)(size-1)/2;
@@ -32,11 +31,19 @@ namespace polygon{
             printf("error, failed GetEdge.\n");
             exit(-1);
         }
-        for(int i=0; i<=mid; ++i){
-            monochan_before.points_chain.emplace_back(points_chain[i]);
+        // 按照这个chain的顺序来排列的
+        if(mid != 0){
+            for (int i = 0; i <= mid; ++i)
+            {
+                monochan_before.points_chain.emplace_back(points_chain[i]);
+            }
         }
-        for(int i=mid+1; i<size; ++i){
-            monochain_after.points_chain.emplace_back(points_chain[i]);
+        if(mid + 1 != size - 1)
+        {
+            for (int i = mid + 1; i < size; ++i)
+            {
+                monochain_after.points_chain.emplace_back(points_chain[i]);
+            }
         }
         return issucc;
     }
@@ -46,6 +53,7 @@ namespace polygon{
         T min_x = std::numeric_limits<T>::max(), max_x = std::numeric_limits<T>::min(), min_y = std::numeric_limits<T>::max(), max_y = std::numeric_limits<T>::min();
         size_t minx_index = 0, maxx_index = 0, miny_index = 0, maxy_index = 0;
         for(size_t i=0; i<monochain.points_chain.size();++i){
+            std::cout<<monochain.points_chain[i]->x<<", "<<monochain.points_chain[i]->y<<std::endl;
             if(min_x > monochain.points_chain[i]->x){
                 min_x = monochain.points_chain[i]->x;
                 minx_index = i;
@@ -65,7 +73,7 @@ namespace polygon{
         }
         p_left.isleft = true;
         p_left.point2dptr = monochain.points_chain[minx_index];
-
+        std::cout<<"maxx_index "<<maxx_index<<" maxx is "<<max_x<<std::endl;
         p_right.isleft = false;
         p_right.point2dptr = monochain.points_chain[maxx_index];
 
@@ -94,7 +102,8 @@ namespace polygon{
         
         // check
         if(linepoint2d_fromL1st_xbase_leftest.point2dptr->x != linepoint2d_fromR1st_xbase_leftest.point2dptr->x || linepoint2d_fromL1st_xbase_rightest.point2dptr->x != linepoint2d_fromR1st_xbase_rightest.point2dptr->x){
-            printf("error, the first extreme points get error, same polygon leftest and rightest x is not same.\n");
+            printf("error, the first extreme points get error, same polygon leftest and rightest x is not same. left %lf %lf right %lf %lf.\n", linepoint2d_fromL1st_xbase_leftest.point2dptr->x, linepoint2d_fromR1st_xbase_leftest.point2dptr->x, 
+                        linepoint2d_fromL1st_xbase_rightest.point2dptr->x, linepoint2d_fromR1st_xbase_rightest.point2dptr->x);
             exit(-1);
         }
 
@@ -246,6 +255,47 @@ namespace polygon{
     // }*/
 
     // we think the monochain 
+
+    template <class T>
+    bool PolygonIntersecting<T>::PotentionIntersection(const MonotoneChain<T>& monochain0, const MonotoneChain<T>& monochain1)
+    {
+        if(monochain0.points_chain.size() == 0 || monochain1.points_chain.size() == 0){
+            return false;
+        }
+        if(monochain0.points_chain.size() == 1 || monochain1.points_chain.size() == 1){
+            printf("error, monochain points size cannot be 1 that cannot create a line.\n");
+            exit(-1);
+        }
+        T minx0 = std::numeric_limits<T>::max(), miny0 = std::numeric_limits<T>::max(), 
+          maxx0 = std::numeric_limits<T>::min(), maxy0 = std::numeric_limits<T>::max();
+        T minx1 = std::numeric_limits<T>::max(), miny1 = std::numeric_limits<T>::max(), 
+          maxx1 = std::numeric_limits<T>::min(), maxy1 = std::numeric_limits<T>::max();
+        
+        for(auto elem : monochain0.points_chain){
+            if(minx0 > elem->x)
+                minx0 = elem->x;
+            if(miny0 > elem->y)
+                miny0 = elem->y;
+            if(maxx0 < elem->x)
+                maxx0 = elem->x;
+            if(maxy0 < elem->y)
+                maxy0 = elem->y;
+        }
+        for(auto elem : monochain1.points_chain){
+            if(minx1 > elem->x)
+                minx1 = elem->x;
+            if(miny1 > elem->y)
+                miny1 = elem->y;
+            if(maxx1 < elem->x)
+                maxx1 = elem->x;
+            if(maxy1 < elem->y)
+                maxy1 = elem->y;
+        }
+        bool possiblex = IsRangeMixed(minx0, maxx0, minx1, maxx1);
+        bool possibley = IsRangeMixed(miny0, maxy0, minx1, maxy1);
+
+        return (possiblex && possibley);
+    }
 
     template <class T>
     bool PolygonIntersecting<T>::PotentionIntersection(const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_hor, const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_vel){ // sort 肯定是偶数的
@@ -526,7 +576,8 @@ namespace polygon{
                     // 把min 也放进来
                     rightfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[count]);
                     leftfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[count]);
-                    maxx0_index = next_count;
+                    // maxx0_index = next_count;
+                    maxx0_index = count;
                     maxx0_expoint = expoints_first[maxx0_index];
                     count = maxx0_index; next_count = minx0_index;
                     while(count != next_count){
@@ -557,7 +608,8 @@ namespace polygon{
                     leftfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[count]);
                     rightfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[count]);
 
-                    minx0_index = next_count;
+                    // minx0_index = next_count;
+                    minx0_index = count;
                     minx0_expoint = expoints_first[minx0_index];
                     count = minx0_index; next_count = maxx0_index;
                     while(count != next_count){
@@ -634,7 +686,8 @@ namespace polygon{
                     // 把min 也放进来
                     rightfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[count]);
                     leftfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[count]);
-                    maxy0_index = next_count;
+                    // maxy0_index = next_count;
+                    maxy0_index = count;
                     maxy0_expoint = expoints_first[maxy0_index];
                     count = maxy0_index; next_count = miny0_index;
                     while(count != next_count){
@@ -665,7 +718,8 @@ namespace polygon{
                     leftfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[count]);
                     rightfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[count]);
 
-                    miny0_index = next_count;
+                    // miny0_index = next_count;
+                    miny0_index = count;
                     miny0_expoint = expoints_first[miny0_index];
                     count = miny0_index; next_count = maxy0_index;
                     while(count != next_count){
@@ -767,7 +821,9 @@ namespace polygon{
                     // 把min 也放进来
                     rightsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[count]);
                     leftsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[count]);
-                    maxx1_index = next_count;
+
+                    // maxx1_index = next_count;
+                    maxx1_index = count;
                     maxx1_expoint = expoints_second[maxx1_index];
                     count = maxx1_index; next_count = minx1_index;
                     while(count != next_count){
@@ -798,7 +854,8 @@ namespace polygon{
                     leftsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[count]);
                     rightsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[count]);
 
-                    minx1_index = next_count;
+                    // minx1_index = next_count;
+                    minx1_index = count;
                     minx1_expoint = expoints_second[minx1_index];
                     count = minx1_index; next_count = maxx1_index;
                     while(count != next_count){
@@ -875,7 +932,9 @@ namespace polygon{
                     // 把min 也放进来
                     rightsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[count]);
                     leftsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[count]);
-                    maxy1_index = next_count;
+
+                    // maxy1_index = next_count;
+                    maxy1_index = count;
                     maxy1_expoint = expoints_second[maxy1_index];
                     count = maxy1_index; next_count = miny1_index;
                     while(count != next_count){
@@ -906,7 +965,8 @@ namespace polygon{
                     leftsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[count]);
                     rightsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[count]);
 
-                    miny1_index = next_count;
+                    // miny1_index = next_count;
+                    miny1_index = count;
                     miny1_expoint = expoints_second[miny1_index];
                     count = miny1_index; next_count = maxy1_index;
                     while(count != next_count){
@@ -1117,7 +1177,14 @@ namespace polygon{
     void PolygonIntersecting<T>::CalIntersectionBetweenTwoMonochainLine(MonotoneChain<T>& chain0, MonotoneChain<T>& chain1, int start0, int start1){
         if(chain0.points_chain.size() < 3 && chain1.points_chain.size() < 3){// 都只剩下一条边的时候
             // 判断当前是否存在交点，并计算交点位置
-            printf("run in the chain points size < 3.\n");
+            printf("run in the chain points size < 3 %d %d.\n", (int)chain0.points_chain.size(), (int)chain1.points_chain.size());
+            if(chain0.points_chain.size() == 0 || chain1.points_chain.size() == 0){
+                return ;// no interesction.
+            }
+            if(chain0.points_chain.size() == 1 || chain1.points_chain.size() == 1){
+                printf("error, these chain points size cannot be 1 ...\n");
+                exit(-1);
+            }
             extreme_edge_t<T> midedge0, midedge1;
             midedge0.p_start = chain0.points_chain[0];
             midedge0.p_end = chain0.points_chain[1];
@@ -1138,6 +1205,7 @@ namespace polygon{
                     delete inter;
                 }
             }
+            return;
         }
         else{
             // 几种状态，需要分别判断，分支递归或者直接判断结果
@@ -1145,6 +1213,8 @@ namespace polygon{
             printf("run in the chain points intersection.\n");
             MonotoneChain<T> leftchain0, rightchain0, leftchain1, rightchain1;
             extreme_edge_t<T> midedge0, midedge1;
+            printf("before split chain0_1 size is %d %d.\n", (int)chain0.points_chain.size(), (int)chain1.points_chain.size());
+        
             chain0.GetMidEdge(midedge0, leftchain0, rightchain0);
             chain1.GetMidEdge(midedge1, leftchain1, rightchain1);
             if(IsLineIntersecting(midedge0, midedge1)){
@@ -1159,35 +1229,23 @@ namespace polygon{
                 }
                 else{
                     delete inter;
+                    // 没有相交，则把mid的端点，加入left 和 right中。
+                    rightchain0.points_chain.insert(rightchain0.points_chain.begin(), midedge0.p_start);
+                    rightchain0.points_chain.insert(rightchain0.points_chain.begin(), midedge0.p_end);
+                    rightchain1.points_chain.insert(rightchain1.points_chain.begin(), midedge1.p_start);
+                    rightchain1.points_chain.insert(rightchain1.points_chain.begin(), midedge1.p_end);
                 }
             }
-            std::vector<linepoint2d_t<T>> leftchainlinepoints0, rightchainlinepoints0, leftchainlinepoints1, rightchainlinepoints1;
-            // 由于不知道tag 所以不能快速的进行x extremepoints 和 yextremepoints的分离。
-            for(int i=0; i<leftchain0.points_chain.size(); ++i){
-                
-            }
-            
-            for(int i=0; i<rightchain0.points_chain.size(); ++i){
-                
-            }
-            
-            for(int i=0; i<leftchain1.points_chain.size(); ++i){
-                
-            }
-            
-            for(int i=0; i<rightchain1.points_chain.size(); ++i){
-                
-            }
-            printf("run rePotentionIntersections intersections. leftchainlinepoints0,1 is (%d, %d).\n", (int)leftchainlinepoints0.size(), (int)leftchainlinepoints1.size());
-            // 这里的问题是： 这里是两个chain之间可能性的比较，要自己创建sorted points
-            if (PotentionIntersection(leftchainlinepoints0, leftchainlinepoints1))
+
+            if (PotentionIntersection(leftchain0, leftchain1))
                 CalIntersectionBetweenTwoMonochainLine(leftchain0, leftchain1, 0, 0);
-            if (PotentionIntersection(leftchainlinepoints0, rightchainlinepoints1))
+            if (PotentionIntersection(leftchain0, rightchain1))
                 CalIntersectionBetweenTwoMonochainLine(leftchain0, rightchain1, 0, 0);
-            if (PotentionIntersection(rightchainlinepoints0, leftchainlinepoints1))
+            if (PotentionIntersection(rightchain0, leftchain0))
                 CalIntersectionBetweenTwoMonochainLine(rightchain0, leftchain1, 0, 0);
-            if (PotentionIntersection(rightchainlinepoints1, rightchainlinepoints1))
+            if (PotentionIntersection(rightchain0, rightchain1))
                 CalIntersectionBetweenTwoMonochainLine(rightchain0, rightchain1, 0, 0);
+            
             return;
         }
 
@@ -1223,3 +1281,90 @@ namespace polygon{
         return false;
     }
 }
+
+
+// 这里设计没有设计好！！
+            // 由于不知道tag 所以不能快速的进行x extremepoints 和 yextremepoints的分离。
+            // T minx = std::numeric_limits<T>::max(), maxx = std::numeric_limits<T>::min(), miny = std::numeric_limits<T>::max(), maxy = std::numeric_limits<T>::min();
+            // int leftchain0_minx_index, leftchain0_maxx_index, leftchain0_miny_index, leftchain0_maxy_index;
+            // for(int i=0; i<leftchain0.points_chain.size(); ++i){
+            //     if(minx > leftchain0.points_chain[i]->x){
+            //         leftchain0_minx_index = i;
+            //         minx = leftchain0.points_chain[i]->x;
+            //     }
+            //     if(miny > leftchain0.points_chain[i]->y){
+            //         leftchain0_miny_index = i;
+            //         miny = leftchain0.points_chain[i]->y;
+            //     }
+            //     if(maxx < leftchain0.points_chain[i]->x){
+            //         leftchain0_maxx_index = i;
+            //         maxx = leftchain0.points_chain[i]->x;
+            //     }
+            //     if(maxy < leftchain0.points_chain[i]->y){
+            //         leftchain0_maxx_index = i;
+            //         maxy = leftchain0.points_chain[i]->y;
+            //     }
+            // }
+            // minx = std::numeric_limits<T>::max(), maxx = std::numeric_limits<T>::min(), miny = std::numeric_limits<T>::max(), maxy = std::numeric_limits<T>::min();
+            // int rightchain0_minx_index, rightchain0_maxx_index, rightchain0_miny_index, rightchain0_maxy_index;
+            // for(int i=0; i<rightchain0.points_chain.size(); ++i){
+            //     if(minx > rightchain0.points_chain[i]->x){
+            //         rightchain0_minx_index = i;
+            //         minx = rightchain0.points_chain[i]->x;
+            //     }
+            //     if(miny > rightchain0.points_chain[i]->y){
+            //         rightchain0_miny_index = i;
+            //         miny = rightchain0.points_chain[i]->y;
+            //     }
+            //     if(maxx < rightchain0.points_chain[i]->x){
+            //         rightchain0_maxx_index = i;
+            //         maxx = rightchain0.points_chain[i]->x;
+            //     }
+            //     if(maxy < rightchain0.points_chain[i]->y){
+            //         rightchain0_maxx_index = i;
+            //         maxy = rightchain0.points_chain[i]->y;
+            //     }
+            // }
+
+            // minx = std::numeric_limits<T>::max(), maxx = std::numeric_limits<T>::min(), miny = std::numeric_limits<T>::max(), maxy = std::numeric_limits<T>::min();
+            // int leftchain1_minx_index, leftchain1_maxx_index, leftchain1_miny_index, leftchain1_maxy_index;
+            // for(int i=0; i<rightchain1.points_chain.size(); ++i){
+            //     if(minx > leftchain1.points_chain[i]->x){
+            //         leftchain1_minx_index = i;
+            //         minx = leftchain1.points_chain[i]->x;
+            //     }
+            //     if(miny > leftchain1.points_chain[i]->y){
+            //         leftchain1_miny_index = i;
+            //         miny = leftchain1.points_chain[i]->y;
+            //     }
+            //     if(maxx < leftchain1.points_chain[i]->x){
+            //         leftchain1_maxx_index = i;
+            //         maxx = leftchain1.points_chain[i]->x;
+            //     }
+            //     if(maxy < leftchain1.points_chain[i]->y){
+            //         leftchain1_maxx_index = i;
+            //         maxy = leftchain1.points_chain[i]->y;
+            //     }
+            // }
+            // minx = std::numeric_limits<T>::max(), maxx = std::numeric_limits<T>::min(), miny = std::numeric_limits<T>::max(), maxy = std::numeric_limits<T>::min();
+            // int rightchain1_minx_index, rightchain1_maxx_index, rightchain1_miny_index, rightchain1_maxy_index;
+            // for(int i=0; i<rightchain1.points_chain.size(); ++i){
+            //     if(minx > rightchain1.points_chain[i]->x){
+            //         rightchain1_minx_index = i;
+            //         minx = rightchain1.points_chain[i]->x;
+            //     }
+            //     if(miny > rightchain1.points_chain[i]->y){
+            //         rightchain1_miny_index = i;
+            //         miny = rightchain1.points_chain[i]->y;
+            //     }
+            //     if(maxx < rightchain1.points_chain[i]->x){
+            //         rightchain1_maxx_index = i;
+            //         maxx = rightchain1.points_chain[i]->x;
+            //     }
+            //     if(maxy < rightchain1.points_chain[i]->y){
+            //         rightchain1_maxx_index = i;
+            //         maxy = rightchain1.points_chain[i]->y;
+            //     }
+            // }
+            // printf("run rePotentionIntersections intersections. leftchainlinepoints0,1 is (%d, %d).\n", (int)leftchainlinepoints0.size(), (int)leftchainlinepoints1.size());
+            // 这里的问题是： 这里是两个chain之间可能性的比较，要自己创建sorted points

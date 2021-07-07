@@ -101,7 +101,9 @@ namespace polygon{
         
         bool seg0_seg1s = ToLeftTest_ISOL(segment0.p_start, segment0.p_end, segment1.p_start);
         bool seg0_seg1e = ToLeftTest_ISOL(segment0.p_start, segment0.p_end, segment1.p_end);
+        printf("seg0 1se %d %d.\n", seg0_seg1s, seg0_seg1e);
         bool flag0 = false;
+        // 异或
         if(seg0_seg1s ^ seg0_seg1e){
             flag0 = true;
         }
@@ -111,7 +113,8 @@ namespace polygon{
 
         bool seg1_seg0s = ToLeftTest_ISOL(segment1.p_start, segment1.p_end, segment0.p_start);
         bool seg1_seg0e = ToLeftTest_ISOL(segment1.p_start, segment1.p_end, segment0.p_end);
-        if(seg1_seg0s ^ seg1_seg0e && flag0){
+        printf("seg1 1se %d %d.\n", seg1_seg0s, seg1_seg0e);
+        if((seg1_seg0s ^ seg1_seg0e) && flag0){
             return true;
         }
         else{
@@ -246,6 +249,12 @@ namespace polygon{
                     intersections_.clear();
                 }
             }
+
+            void GetIntersections(std::vector<point2d_t<T>*>& interpoints){
+                for(int i=0; i<intersections_.size(); ++i){
+                    interpoints.emplace_back(intersections_[i].second);
+                }
+            }
         private:
             // decide a main direction, to split polygon. just use ox(_|_)oy
             // split ordered:
@@ -275,7 +284,7 @@ namespace polygon{
             void OrderLineEndPoints();
             bool PotentionIntersection(const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d);
             bool PotentionIntersection(const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_hor, const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_vel);
-
+            bool PotentionIntersection(const MonotoneChain<T>& monochain0, const MonotoneChain<T>& monochain1);
             // bool PotentionIntersection(const MonotoneChain<T>& monochain0, const MonotoneChain<T>& monochain1, const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_hor, const std::vector<linepoint2d_t<T>>& sorted_extremelinepoint2d_vel);
             std::vector<linepoint2d_t<T>> sorted_extremelinepoint2d_xbase_hor_, sorted_extremelinepoint2d_xbase_vel00_, sorted_extremelinepoint2d_xbase_vel01_, sorted_extremelinepoint2d_xbase_vel10_, sorted_extremelinepoint2d_xbase_vel11_;
             std::vector<linepoint2d_t<T>> sorted_extremelinepoint2d_ybase_hor00_, sorted_extremelinepoint2d_ybase_hor01_, sorted_extremelinepoint2d_ybase_hor10_, sorted_extremelinepoint2d_ybase_hor11_, sorted_extermelinepoint2d_ybase_vel_; 

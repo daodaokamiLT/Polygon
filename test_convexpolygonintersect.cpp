@@ -32,7 +32,7 @@ int main(int argc, char* argv[]){
     for(auto p : resort_points){
         cv::line(img, cv::Point2d((10*p0->x+50), 550-(10*p0->y)), cv::Point2d((10*p->x+50), 550-10*p->y), 255);
         // cv::imshow("img", img);
-        cv::waitKey(30);
+        // cv::waitKey(30);
     }
 
     polygon::Polygon<double> polygon1(copyshift_points);

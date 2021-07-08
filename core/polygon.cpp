@@ -240,7 +240,6 @@ namespace polygon{
         pmaxy_ = points_[maxy_idx];
         // now the result is a starpolygon.
         printf("selected element points is selected_id %lld, position is (%lf, %lf).\n", selected_id, (double)points_[selected_id]->x, (double)points_[selected_id]->y);
-        
         point2d_t<T>::star_center = points_[selected_id];
         point2d_t<T>* temp = points_[0];
         points_[0] = points_[selected_id];
@@ -267,8 +266,7 @@ namespace polygon{
             prepared_points.Push(points_[i]);
         }
         // printf("prepared_points size is: %d.\n", (int)prepared_points.Size());
-        while(!prepared_points.IsEmpty()){
-            
+        while(!prepared_points.IsEmpty()){           
             auto ptop = prepared_points.Top();
             int curIndex = accepted_points.Size();
             if(curIndex < 2){

@@ -1,5 +1,13 @@
 #include "polygon_intersecting.h"
 #include <limits>
+
+#define debug true
+
+#if debug
+    #include <opencv2/core.hpp>
+    #include <opencv2/highgui.hpp>
+    #include <opencv2/imgproc.hpp>
+#endif
 /***
  * 
  * 需要解决那种交在定点上，或者重合的问题
@@ -501,7 +509,7 @@ namespace polygon{
         expoints_first.emplace_back(exedges0[0].p_start);
         expoints_first.emplace_back(exedges0[0].p_end);
         // printf("exedges0 %d (%lf %f) - (%lf %lf).\n", 0, exedges0[0].p_start->x, exedges0[0].p_start->y, exedges0[0].p_end->x, exedges0[0].p_end->y);
-        for(int i=1; i<exedges0.size(); ++i){
+        for(int i=1; i<exedges0.size()-1; ++i){
             // printf("exedges0 %d (%lf %f) - (%lf %lf).\n", i, exedges0[i].p_start->x, exedges0[i].p_start->y, exedges0[i].p_end->x, exedges0[i].p_end->y);
             if(!expoints_first[i]->Equal(exedges0[i].p_start)){
                 printf("edge cannot match with points order.\n");
@@ -557,10 +565,18 @@ namespace polygon{
             }
         }
         // 定理： 一个循环有序队列中，最大值和最小值的index 不可能都在端点, 除非一条直线的情况加一个点的情况
+        for(int i=0; i<expoints_first.size(); ++i){
+            printf("export first %d is %lf %lf.\n", i, expoints_first[i]->x, expoints_first[i]->y);
+        }
         for(int i=firstDiff_Index; i<endthreshold; ++i){//must can be find minest or maxest x points, but should 
             if(findminfirst){
                 if(expoints_first[i]->x > expoints_first[i-1]->x){
                     // 当出现第一个小于的值时，找到最大值。接下来，将所当前最大值和之后所有递减的push into leftfirst_monochain
+                    int temp = i-2;
+                    if(temp < 0){ temp = endthreshold-1;}
+                    printf("minx0_expoint %d-1 is %lf %lf.\n", i-1, expoints_first[temp]->x, expoints_first[temp]->y);
+                    printf("minx0_expoint %d is %lf %lf.\n", i-1, expoints_first[i-1]->x, expoints_first[i-1]->y);
+                    printf("minx0_expoint %d+1 is %lf %lf.\n", i-1, expoints_first[i]->x, expoints_first[i]->y);
                     minx0_index = i-1;
                     minx0_expoint = expoints_first[minx0_index];
                     int count = minx0_index;
@@ -576,10 +592,20 @@ namespace polygon{
                     // 把min 也放进来
                     rightfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[count]);
                     leftfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[count]);
+                    
+                    temp = count-1;
+                    if(temp < 0){ temp = endthreshold-1;}
+                    int temp1 = count+1;
+                    if(temp1 >= endthreshold){temp1 = 0;}
+                    printf("maxx0_expoint %d-1 is %lf %lf.\n", count, expoints_first[temp]->x, expoints_first[temp]->y);
+                    printf("maxx0_expoint %d is %lf %lf.\n", count, expoints_first[count]->x, expoints_first[count]->y);
+                    printf("maxx0_expoint %d+1 is %lf %lf.\n", count, expoints_first[temp1]->x, expoints_first[temp1]->y);
                     // maxx0_index = next_count;
                     maxx0_index = count;
                     maxx0_expoint = expoints_first[maxx0_index];
-                    count = maxx0_index; next_count = minx0_index;
+                    count = maxx0_index+1; 
+                    if(count == endthreshold){count = 0;}
+                    next_count = minx0_index;
                     while(count != next_count){
                         leftfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[count]);
                         ++count;
@@ -611,7 +637,9 @@ namespace polygon{
                     // minx0_index = next_count;
                     minx0_index = count;
                     minx0_expoint = expoints_first[minx0_index];
-                    count = minx0_index; next_count = maxx0_index;
+                    count = minx0_index+1;
+                    if(count == endthreshold){ count = 0;}
+                    next_count = maxx0_index;
                     while(count != next_count){
                         rightfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[count]);
                         ++count;
@@ -689,7 +717,9 @@ namespace polygon{
                     // maxy0_index = next_count;
                     maxy0_index = count;
                     maxy0_expoint = expoints_first[maxy0_index];
-                    count = maxy0_index; next_count = miny0_index;
+                    count = maxy0_index+1;
+                    if(count == endthreshold){count = 0;}
+                    next_count = miny0_index;
                     while(count != next_count){
                         leftfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[count]);
                         ++count;
@@ -721,7 +751,9 @@ namespace polygon{
                     // miny0_index = next_count;
                     miny0_index = count;
                     miny0_expoint = expoints_first[miny0_index];
-                    count = miny0_index; next_count = maxy0_index;
+                    count = miny0_index+1;
+                    if(count == endthreshold){ count = 0; }
+                    next_count = maxy0_index;
                     while(count != next_count){
                         rightfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[count]);
                         ++count;
@@ -745,7 +777,7 @@ namespace polygon{
         expoints_second.emplace_back(exedges1[0].p_start);
         expoints_second.emplace_back(exedges1[0].p_end);
         // printf("exedges1 %d (%lf %f) - (%lf %lf).\n", 0, exedges1[0].p_start->x, exedges1[0].p_start->y, exedges1[0].p_end->x, exedges1[0].p_end->y);
-        for(int i=1; i<exedges1.size(); ++i){
+        for(int i=1; i<exedges1.size()-1; ++i){
             // printf("exedges1 %d (%lf %f) - (%lf %lf).\n", i, exedges1[i].p_start->x, exedges1[i].p_start->y, exedges1[i].p_end->x, exedges1[i].p_end->y);
             if(!expoints_second[i]->Equal(exedges1[i].p_start)){
                 printf("edge cannot match with points order.\n");
@@ -753,7 +785,6 @@ namespace polygon{
             }
             expoints_second.emplace_back(exedges1[i].p_end);
         }
-    
         /***=============           first start X major           =================**/
         point2d_t<T>* minx1_expoint = nullptr, *maxx1_expoint = nullptr, *miny1_expoint = nullptr, *maxy1_expoint = nullptr;
         size_t minx1_index, maxx1_index, miny1_index, maxy1_index;
@@ -825,7 +856,10 @@ namespace polygon{
                     // maxx1_index = next_count;
                     maxx1_index = count;
                     maxx1_expoint = expoints_second[maxx1_index];
-                    count = maxx1_index; next_count = minx1_index;
+                    count = maxx1_index+1; 
+                    if(count == endthreshold)
+                        count = 0;
+                    next_count = minx1_index;
                     while(count != next_count){
                         leftsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[count]);
                         ++count;
@@ -854,10 +888,11 @@ namespace polygon{
                     leftsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[count]);
                     rightsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[count]);
 
-                    // minx1_index = next_count;
                     minx1_index = count;
                     minx1_expoint = expoints_second[minx1_index];
-                    count = minx1_index; next_count = maxx1_index;
+                    count = minx1_index+1; 
+                    if(count == endthreshold){count = 0;}
+                    next_count = maxx1_index;
                     while(count != next_count){
                         rightsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[count]);
                         ++count;
@@ -921,7 +956,7 @@ namespace polygon{
                     miny1_expoint = expoints_second[miny1_index];
                     int count = miny1_index;
                     int next_count = count+1;
-                    if(next_count == endthreshold) next_count = 0;
+                    if(next_count == endthreshold) {next_count = 0;}
                     while(expoints_second[next_count]->y >= expoints_second[count]->y){
                         rightsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[count]);
                         ++count;
@@ -936,7 +971,9 @@ namespace polygon{
                     // maxy1_index = next_count;
                     maxy1_index = count;
                     maxy1_expoint = expoints_second[maxy1_index];
-                    count = maxy1_index; next_count = miny1_index;
+                    count = maxy1_index+1; 
+                    if(count == endthreshold){count = 0;}
+                    next_count = miny1_index;
                     while(count != next_count){
                         leftsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[count]);
                         ++count;
@@ -954,7 +991,7 @@ namespace polygon{
                     maxy1_expoint = expoints_second[maxy1_index];
                     int count = maxy1_index;
                     int next_count = count + 1;
-                    if(next_count == endthreshold) next_count = 0;
+                    if(next_count == endthreshold) {next_count = 0;}
                     while(expoints_second[next_count]->y <= expoints_second[count]->y){
                         leftsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[count]);
                         ++count;
@@ -968,7 +1005,9 @@ namespace polygon{
                     // miny1_index = next_count;
                     miny1_index = count;
                     miny1_expoint = expoints_second[miny1_index];
-                    count = miny1_index; next_count = maxy1_index;
+                    count = miny1_index+1; 
+                    if(count == endthreshold){ count = 0; }
+                    next_count = maxy1_index;
                     while(count != next_count){
                         rightsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[count]);
                         ++count;
@@ -1217,10 +1256,19 @@ namespace polygon{
         
             chain0.GetMidEdge(midedge0, leftchain0, rightchain0);
             chain1.GetMidEdge(midedge1, leftchain1, rightchain1);
+
+#if debug
+            cv::Mat image(cv::Size(800, 600), CV_8UC1, cv::Scalar(0));
+            cv::line(image, cv::Point2d(50 + 10 * midedge0.p_start->x, 550 - 10 * midedge0.p_start->y), cv::Point2d(50 + 10 * midedge0.p_end->x, 550 - 10 * midedge0.p_end->y), 255, 1);
+            cv::line(image, cv::Point2d(50 + 10 * midedge1.p_start->x, 550 - 10 * midedge1.p_start->y), cv::Point2d(50 + 10 * midedge1.p_end->x, 550 - 10 * midedge1.p_end->y), 255, 1);
+            cv::imshow("debug image", image);
+            cv::waitKey(0);
+#endif
             if(IsLineIntersecting(midedge0, midedge1)){
                 printf("line intersecting...\n");
                 point2d_t<T>* inter = new point2d_t<T>(0 ,0); 
                 bool issucc = CalRealIntersectionPosition(midedge0, midedge1, inter);
+                
                 if(issucc){
                     extremeedge_index_t indexes; // 在这个位置的点和后面一个点之间的边会存在一个交点
                     indexes.first_index = start0+(chain0.points_chain.size()-1)/2;

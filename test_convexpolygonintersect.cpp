@@ -133,8 +133,10 @@ int main(int argc, char* argv[]){
     polygonIntersecting.GetIntersections(interpoints);
     printf("intersection size is %d.\n", (int)interpoints.size());
     for(auto ip : interpoints){
-        cv::circle(img_xbase, cv::Point2d(50+10*ip->x, 550-10*ip->y), 5, cv::Scalar(255), 2);
+        printf("x y is %lf, %lf.\n", ip->x, ip->y);
+        cv::circle(img_xbase, cv::Point2d(50+10*ip->x, 550-10*ip->y), 5, cv::Scalar(255), 5, 2);
     }
+    cv::destroyAllWindows();
     cv::imshow("xbase split", img_xbase);
     cv::waitKey(0);
     // polygonIntersecting

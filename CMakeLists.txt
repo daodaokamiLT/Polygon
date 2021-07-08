@@ -17,3 +17,6 @@ target_link_libraries(test_cornercase ${OpenCV_LIBS})
 
 add_executable(test_convexpolygonintersect test_convexpolygonintersect.cpp)
 target_link_libraries(test_convexpolygonintersect ${OpenCV_LIBS})
+
+add_executable(test_intersection test_intersection.cpp)
+target_link_libraries(test_intersection ${OpenCV_LIBS})

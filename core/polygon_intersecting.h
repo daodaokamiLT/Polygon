@@ -98,8 +98,9 @@ namespace polygon{
         else if(flag_endpoint0 || flag_endpoint1){
             return true;
         }
-        
+        printf("Tolefttest Isolate point is %lf %lf, %lf %lf, %lf %lf.\n", segment0.p_start->x, segment0.p_start->y, segment0.p_end->x, segment0.p_end->y, segment1.p_start->x, segment1.p_start->y);
         bool seg0_seg1s = ToLeftTest_ISOL(segment0.p_start, segment0.p_end, segment1.p_start);
+        printf("Tolefttest Isolate point is %lf %lf, %lf %lf, %lf %lf.\n", segment0.p_start->x, segment0.p_start->y, segment0.p_end->x, segment0.p_end->y, segment1.p_end->x, segment1.p_end->y);
         bool seg0_seg1e = ToLeftTest_ISOL(segment0.p_start, segment0.p_end, segment1.p_end);
         printf("seg0 1se %d %d.\n", seg0_seg1s, seg0_seg1e);
         bool flag0 = false;
@@ -111,6 +112,8 @@ namespace polygon{
             return false;
         }
 
+        printf("Tolefttest 1 Isolate point is %lf %lf, %lf %lf, %lf %lf.\n", segment1.p_start->x, segment1.p_start->y, segment1.p_end->x, segment1.p_end->y, segment0.p_start->x, segment0.p_start->y);
+        printf("Tolefttest 1 Isolate point is %lf %lf, %lf %lf, %lf %lf.\n", segment1.p_start->x, segment1.p_start->y, segment1.p_end->x, segment1.p_end->y, segment0.p_end->x, segment0.p_end->y);
         bool seg1_seg0s = ToLeftTest_ISOL(segment1.p_start, segment1.p_end, segment0.p_start);
         bool seg1_seg0e = ToLeftTest_ISOL(segment1.p_start, segment1.p_end, segment0.p_end);
         printf("seg1 1se %d %d.\n", seg1_seg0s, seg1_seg0e);

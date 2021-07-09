@@ -785,7 +785,7 @@ namespace polygon
         ++firstDiff_Index;
         if (firstDiff_Index == endthreshold)
         {
-            printf("run in here firstDiff_index = endthreshold.\n");
+            PolygonPrintf("run in here firstDiff_index = endthreshold.\n");
             // minfirst 是第一次找到的是minx， 然后从min->max, 那么优先的是right monochain
             for (int i = 0; i < firstDiff_Index - 1; ++i)
             {
@@ -820,10 +820,10 @@ namespace polygon
          * **/ 
         for (int i = firstDiff_Index; i < endthreshold; ++i)
         { //must can be find minest or maxest x points, but should
-            printf("run in here in for.\n");
+            PolygonPrintf("run in here in for.\n");
             if (findminfirst)
             {
-                printf("run in findmindyfirst.\n");
+                PolygonPrintf("run in findmindyfirst.\n");
                 if (expoints_first[i]->y > expoints_first[i - 1]->y)
                 {
                     // 当出现第一个小于的值时，找到最大值。接下来，将所当前最大值和之后所有递减的push into leftfirst_monochain
@@ -869,8 +869,8 @@ namespace polygon
             else
             {
                 // find max
-                printf("run in findmaxdyfirst.\n");
-                printf("expoints i(%d) and i-1(%d) is %lf %lf.\n", i, i-1, expoints_first[i]->y, expoints_first[i-1]->y);
+                PolygonPrintf("run in findmaxdyfirst.\n");
+                PolygonPrintf("expoints i(%d) and i-1(%d) is %lf %lf.\n", i, i-1, expoints_first[i]->y, expoints_first[i-1]->y);
                 if (expoints_first[i]->y < expoints_first[i - 1]->y)
                 {
                     // 找到最小值，接下来，把所有当前最小值之后递增的pushinto rightfirst_monochain
@@ -882,7 +882,7 @@ namespace polygon
                         next_count = 0;
                     while (expoints_first[next_count]->y <= expoints_first[count]->y)
                     {
-                        printf("run in push data into leftfirst ybase.\n");
+                        PolygonPrintf("run in push data into leftfirst ybase.\n");
                         leftfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[count]);
                         ++count;
                         if (count == endthreshold)
@@ -1132,7 +1132,7 @@ namespace polygon
         ++firstDiff_Index;
         if (firstDiff_Index == endthreshold)
         {
-            printf("run in here, firstDiff_index == endthreshold.\n");
+            PolygonPrintf("run in here, firstDiff_index == endthreshold.\n");
             // minfirst 是第一次找到的是minx， 然后从min->max, 那么优先的是right monochain
             for (int i = 0; i < firstDiff_Index - 1; ++i)
             {
@@ -1161,7 +1161,7 @@ namespace polygon
         // 定理： 一个循环有序队列中，最大值和最小值的index 不可能都在端点, 除非一条直线的情况加一个点的情况
         for (int i = firstDiff_Index; i < endthreshold; ++i)
         { //must can be find minest or maxest x points, but should
-            printf("run in here in for.\n");
+            PolygonPrintf("run in here in for.\n");
             if (findminfirst)
             {
                 if (expoints_second[i]->y > expoints_second[i - 1]->y)
@@ -1265,10 +1265,10 @@ namespace polygon
                 break;
             }
         }
-        printf("polygon xbase extreme points size is %d, leftchain size is %d, rightchain size is %d.\n", (int)polygon_firstptr_->SizeOfExtremePoints(), (int)leftfirst_monochain_xbase_.points_chain.size(), (int)rightfirst_monochain_xbase_.points_chain.size());
-        printf("polygon ybase extreme points size is %d, leftchain size is %d, rightchain size is %d.\n", (int)polygon_firstptr_->SizeOfExtremePoints(), (int)leftfirst_monochain_ybase_.points_chain.size(), (int)rightfirst_monochain_ybase_.points_chain.size());
-        printf("polygon xbase second extreme points size is %d, leftchain size is %d, rightchain size is %d.\n", (int)polygon_secondptr_->SizeOfExtremePoints(), (int)leftsecond_monochain_xbase_.points_chain.size(), (int)rightsecond_monochain_xbase_.points_chain.size());
-        printf("polygon ybase second extreme points size is %d, leftchain size is %d, rightchain size is %d.\n", (int)polygon_secondptr_->SizeOfExtremePoints(), (int)leftsecond_monochain_ybase_.points_chain.size(), (int)rightsecond_monochain_ybase_.points_chain.size());
+        PolygonPrintf("polygon xbase extreme points size is %d, leftchain size is %d, rightchain size is %d.\n", (int)polygon_firstptr_->SizeOfExtremePoints(), (int)leftfirst_monochain_xbase_.points_chain.size(), (int)rightfirst_monochain_xbase_.points_chain.size());
+        PolygonPrintf("polygon ybase extreme points size is %d, leftchain size is %d, rightchain size is %d.\n", (int)polygon_firstptr_->SizeOfExtremePoints(), (int)leftfirst_monochain_ybase_.points_chain.size(), (int)rightfirst_monochain_ybase_.points_chain.size());
+        PolygonPrintf("polygon xbase second extreme points size is %d, leftchain size is %d, rightchain size is %d.\n", (int)polygon_secondptr_->SizeOfExtremePoints(), (int)leftsecond_monochain_xbase_.points_chain.size(), (int)rightsecond_monochain_xbase_.points_chain.size());
+        PolygonPrintf("polygon ybase second extreme points size is %d, leftchain size is %d, rightchain size is %d.\n", (int)polygon_secondptr_->SizeOfExtremePoints(), (int)leftsecond_monochain_ybase_.points_chain.size(), (int)rightsecond_monochain_ybase_.points_chain.size());
     }
 
     template <class T>

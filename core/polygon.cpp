@@ -23,9 +23,9 @@ namespace polygon{
     void Polygon<T>::AddNodeForXminsameX(point2d_t<T>* p){
         if( pminx_!= nullptr )
         if(p->x == pminx_->x){
-            // printf("push succ minx.\n");
+            // PolygonPrintf("push succ minx.\n");
             points_.emplace_back(p);
-            // printf("after points size is %d.\n", points_.size());
+            // PolygonPrintf("after points size is %d.\n", points_.size());
         }
     }
     // add xmax same x
@@ -33,9 +33,9 @@ namespace polygon{
     void Polygon<T>::AddNodeForXmaxsameX(point2d_t<T>* p){
         if( pmaxx_!= nullptr )
         if(p->x == pmaxx_->x){
-            // printf("push succ maxx.\n");
+            // PolygonPrintf("push succ maxx.\n");
             points_.emplace_back(p);
-            // printf("after points size is %d.\n", points_.size());
+            // PolygonPrintf("after points size is %d.\n", points_.size());
         }
     }
     // add ymin same y
@@ -43,9 +43,9 @@ namespace polygon{
     void Polygon<T>::AddNodeForYminsameY(point2d_t<T>* p){
         if( pminy_!= nullptr )
         if(p->y == pminy_->y){
-            // printf("push succ miny.\n");
+            // PolygonPrintf("push succ miny.\n");
             points_.emplace_back(p);
-            // printf("after points size is %d.\n", points_.size());
+            // PolygonPrintf("after points size is %d.\n", points_.size());
         }
     }
     // add ymax same y
@@ -53,9 +53,9 @@ namespace polygon{
     void Polygon<T>::AddNodeForYmaxsameY(point2d_t<T>* p){
         if( pmaxy_!= nullptr )
         if(p->y == pmaxy_->y){
-            // printf("push succ maxy.\n");
+            // PolygonPrintf("push succ maxy.\n");
             points_.emplace_back(p);
-            // printf("after points size is %d.\n", points_.size());
+            // PolygonPrintf("after points size is %d.\n", points_.size());
         }
     }
 
@@ -96,7 +96,7 @@ namespace polygon{
     template<class T>
     bool ToLeftTest(const point2d_t<T>* p0, const point2d_t<T>* p1){
         if(!p0->star_center || !p1->star_center || p0->star_center != p1->star_center){
-            printf("error, star_center points has error.\n");
+            PolygonPrintf("error, star_center points has error.\n");
             exit(-1);
         } 
         Eigen::Matrix3d det3 = Eigen::Matrix3d::Zero();
@@ -134,7 +134,7 @@ namespace polygon{
     template <class T>
     bool ToLeftTestPointsPtr(const point2d_t<T>* p0, const point2d_t<T>* p1, const point2d_t<T>* p2){
         if(!p0 || !p1 || !p2){
-            printf("error, points has null, error.\n");
+            PolygonPrintf("error, points has null, error.\n");
             exit(-1);
         }
         Eigen::Matrix3d det3 = Eigen::Matrix3d::Zero();        
@@ -239,7 +239,7 @@ namespace polygon{
         pminy_ = points_[miny_idx];
         pmaxy_ = points_[maxy_idx];
         // now the result is a starpolygon.
-        printf("selected element points is selected_id %lld, position is (%lf, %lf).\n", selected_id, (double)points_[selected_id]->x, (double)points_[selected_id]->y);
+        PolygonPrintf("selected element points is selected_id %lld, position is (%lf, %lf).\n", selected_id, (double)points_[selected_id]->x, (double)points_[selected_id]->y);
         point2d_t<T>::star_center = points_[selected_id];
         point2d_t<T>* temp = points_[0];
         points_[0] = points_[selected_id];
@@ -253,7 +253,7 @@ namespace polygon{
     template<class T>
     void Polygon<T>::CreateExtremeEdges(){
         if(points_.size() < 3){
-            printf("points size is < 3, cannot create polygon.\n");
+            PolygonPrintf("points size is < 3, cannot create polygon.\n");
             exit(-1);
         }
         FunctionalVectorPtr<point2d_t<T>> prepared_points((int)points_.size());
@@ -265,28 +265,28 @@ namespace polygon{
         for(int i=2; i<points_.size(); ++i){
             prepared_points.Push(points_[i]);
         }
-        // printf("prepared_points size is: %d.\n", (int)prepared_points.Size());
+        // PolygonPrintf("prepared_points size is: %d.\n", (int)prepared_points.Size());
         while(!prepared_points.IsEmpty()){           
             auto ptop = prepared_points.Top();
             int curIndex = accepted_points.Size();
             if(curIndex < 2){
-                printf("error, cannot create polygon.\n");
+                PolygonPrintf("error, cannot create polygon.\n");
                 exit(-1);
             }
-            // printf("accept points curIndex-2(%d) element is (%lf, %lf), curIndex-1(%d) element is (%lf, %lf).\n", curIndex-2, accepted_points.Index(curIndex-2)->x, accepted_points.Index(curIndex-2)->y, curIndex-1, accepted_points.Index(curIndex-1)->x, accepted_points.Index(curIndex-1)->y);
-            // printf("prepared_point top is (%lf, %lf).\n---------------------------------------------\n", prepared_points.Top()->x, prepared_points.Top()->y);
+            // PolygonPrintf("accept points curIndex-2(%d) element is (%lf, %lf), curIndex-1(%d) element is (%lf, %lf).\n", curIndex-2, accepted_points.Index(curIndex-2)->x, accepted_points.Index(curIndex-2)->y, curIndex-1, accepted_points.Index(curIndex-1)->x, accepted_points.Index(curIndex-1)->y);
+            // PolygonPrintf("prepared_point top is (%lf, %lf).\n---------------------------------------------\n", prepared_points.Top()->x, prepared_points.Top()->y);
             if(ToLeftTestPointsPtr(accepted_points.Index(curIndex-2), accepted_points.Index(curIndex-1), prepared_points.Top())){
                 // 若是Left， add into accept
-                // printf("isaccept..\n");
+                // PolygonPrintf("isaccept..\n");
                 accepted_points.Push(prepared_points.Top());
                 prepared_points.Pop_Front();
             }
             else{
-                // printf("cannot accept..\n");
+                // PolygonPrintf("cannot accept..\n");
                 accepted_points.Pop_Tail();
             }
         }
-        // printf("accepted_points.size() %d.\n", accepted_points.Size());
+        // PolygonPrintf("accepted_points.size() %d.\n", accepted_points.Size());
         for(int i=0; i<accepted_points.Size()-1; ++i){
             // extreme_edges_.emplace_back();
             extreme_edges_.emplace_back(extreme_edge_t<T>(accepted_points.Index(i), accepted_points.Index(i+1)));
@@ -296,7 +296,7 @@ namespace polygon{
         extreme_points_.emplace_back(accepted_points.Tail());
         extreme_edges_.emplace_back(extreme_edge_t<T>(accepted_points.Tail(), accepted_points.Top()));
 
-        // printf("extreme_edges size is %d.\n", (int)extreme_edges_.size());
+        // PolygonPrintf("extreme_edges size is %d.\n", (int)extreme_edges_.size());
     }
 
     template<class T>

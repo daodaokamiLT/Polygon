@@ -14,6 +14,7 @@
  * 
 */
 
+#define PolygonPrintf(...) //printf(__VA_ARGS__)
 
 namespace polygon{
 

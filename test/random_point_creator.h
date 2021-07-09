@@ -30,7 +30,7 @@ namespace polygon{
             T dy = rand() % 10000 / 10000.;
             
             created_points.emplace_back(point2d_t<T>::CreatePoint(x+dx, y+dy));
-            printf("create p x, y (%lf, %lf).\n", created_points[created_points.size()-1].x, created_points[created_points.size()-1].y);
+            // printf("create p x, y (%lf, %lf).\n", created_points[created_points.size()-1].x, created_points[created_points.size()-1].y);
         }
     
     }

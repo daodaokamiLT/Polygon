@@ -3,6 +3,7 @@
 #include "polygon.h"
 #include <vector>
 
+
 namespace polygon{
     // points ordered by the un clock order, 逆时针
     template <class T>
@@ -85,25 +86,25 @@ namespace polygon{
     bool IsLineIntersecting(const extreme_edge_t<T>& segment0, extreme_edge_t<T>&segment1){
         bool flag_endpoint0 = false, flag_endpoint1 = false;
         if(segment0.p_start->Equal(segment1.p_start) || segment0.p_start->Equal(segment1.p_end)){
-            printf("segment0 is intersecting with segment1 at endpoint start.\n");
+            PolygonPrintf("segment0 is intersecting with segment1 at endpoint start.\n");
             flag_endpoint0 = true;
         }
         if(segment0.p_end->Equal(segment1.p_start) || segment0.p_end->Equal(segment1.p_end)){
-            printf("segment0 is intersecting with segment1 at endpoint end.\n");
+            PolygonPrintf("segment0 is intersecting with segment1 at endpoint end.\n");
             flag_endpoint1 = true;
         }
         if(flag_endpoint0 && flag_endpoint1){
-            printf("two line is all matched.\n");
+            PolygonPrintf("two line is all matched.\n");
             return true;
         }
         else if(flag_endpoint0 || flag_endpoint1){
             return true;
         }
-        printf("Tolefttest Isolate point is %lf %lf, %lf %lf, %lf %lf.\n", segment0.p_start->x, segment0.p_start->y, segment0.p_end->x, segment0.p_end->y, segment1.p_start->x, segment1.p_start->y);
+        PolygonPrintf("Tolefttest Isolate point is %lf %lf, %lf %lf, %lf %lf.\n", segment0.p_start->x, segment0.p_start->y, segment0.p_end->x, segment0.p_end->y, segment1.p_start->x, segment1.p_start->y);
         bool seg0_seg1s = ToLeftTest_ISOL(segment0.p_start, segment0.p_end, segment1.p_start);
-        printf("Tolefttest Isolate point is %lf %lf, %lf %lf, %lf %lf.\n", segment0.p_start->x, segment0.p_start->y, segment0.p_end->x, segment0.p_end->y, segment1.p_end->x, segment1.p_end->y);
+        PolygonPrintf("Tolefttest Isolate point is %lf %lf, %lf %lf, %lf %lf.\n", segment0.p_start->x, segment0.p_start->y, segment0.p_end->x, segment0.p_end->y, segment1.p_end->x, segment1.p_end->y);
         bool seg0_seg1e = ToLeftTest_ISOL(segment0.p_start, segment0.p_end, segment1.p_end);
-        printf("seg0 1se %d %d.\n", seg0_seg1s, seg0_seg1e);
+        PolygonPrintf("seg0 1se %d %d.\n", seg0_seg1s, seg0_seg1e);
         bool flag0 = false;
         // 异或
         if(seg0_seg1s ^ seg0_seg1e){
@@ -113,11 +114,11 @@ namespace polygon{
             return false;
         }
 
-        printf("Tolefttest 1 Isolate point is %lf %lf, %lf %lf, %lf %lf.\n", segment1.p_start->x, segment1.p_start->y, segment1.p_end->x, segment1.p_end->y, segment0.p_start->x, segment0.p_start->y);
-        printf("Tolefttest 1 Isolate point is %lf %lf, %lf %lf, %lf %lf.\n", segment1.p_start->x, segment1.p_start->y, segment1.p_end->x, segment1.p_end->y, segment0.p_end->x, segment0.p_end->y);
+        PolygonPrintf("Tolefttest 1 Isolate point is %lf %lf, %lf %lf, %lf %lf.\n", segment1.p_start->x, segment1.p_start->y, segment1.p_end->x, segment1.p_end->y, segment0.p_start->x, segment0.p_start->y);
+        PolygonPrintf("Tolefttest 1 Isolate point is %lf %lf, %lf %lf, %lf %lf.\n", segment1.p_start->x, segment1.p_start->y, segment1.p_end->x, segment1.p_end->y, segment0.p_end->x, segment0.p_end->y);
         bool seg1_seg0s = ToLeftTest_ISOL(segment1.p_start, segment1.p_end, segment0.p_start);
         bool seg1_seg0e = ToLeftTest_ISOL(segment1.p_start, segment1.p_end, segment0.p_end);
-        printf("seg1 1se %d %d.\n", seg1_seg0s, seg1_seg0e);
+        PolygonPrintf("seg1 1se %d %d.\n", seg1_seg0s, seg1_seg0e);
 
         if((seg1_seg0s ^ seg1_seg0e) && flag0){
             return true;

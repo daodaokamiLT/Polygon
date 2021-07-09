@@ -221,6 +221,7 @@ namespace polygon
                 end_index_ = 0;
             }
         }
+        return true;
     }
 
     template <class T>

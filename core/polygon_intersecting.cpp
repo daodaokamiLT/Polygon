@@ -1350,10 +1350,11 @@ namespace polygon
             PolygonPrintf("error, hasn't OrderLinePoints.\n");
             exit(-1);
         }
-        for (auto pxbase_hor : sorted_extremelinepoint2d_xbase_hor_)
-        {
-            // std::cout<<"sorted: "<<pxbase_hor.point2dptr->x<<", "<<pxbase_hor.point2dptr->y<<", tag "<<pxbase_hor.tag<<", monochainid "<<pxbase_hor.monochainid<<std::endl;
-        }
+        // for (auto pxbase_hor : sorted_extremelinepoint2d_xbase_hor_)
+        // {
+        //     std::cout<<"sorted: "<<pxbase_hor.point2dptr->x<<", "<<pxbase_hor.point2dptr->y<<", tag "<<pxbase_hor.tag<<", monochainid "<<pxbase_hor.monochainid<<std::endl;
+        // }
+        bool possible = false;
         if (PotentionIntersection(sorted_extremelinepoint2d_xbase_hor_))
         {
             // just need one possible that canbe has intersection.
@@ -1382,12 +1383,10 @@ namespace polygon
                 potention_intersection_tags_.emplace_back("011");
                 flag = true;
             }
-            return flag;
+            if(flag)
+                possible = flag;
         }
-        else
-        {
-            return false;
-        }
+        return possible;
     }
 
     template <class T>
@@ -1424,7 +1423,10 @@ namespace polygon
                 potention_intersection_tags_.emplace_back("111");
                 flag = true;
             }
+            if(flag)
+                possible = flag;
         }
+        return possible;
     }
 
     template <class T>

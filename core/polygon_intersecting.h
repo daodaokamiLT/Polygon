@@ -64,20 +64,21 @@ namespace polygon{
     // 是有可能都有相交，但是一个交点都没有情况出现的。
     template <class T>
     bool IsRangeMixed(T min0, T max0, T min1, T max1){
+        bool flag = false;
         if(min0 < min1){
             if(max0 >= min1){
-                return true;
+                flag = true;
             }
         }
         else if(min0 > min1){
             if(max1 >= min0){
-                return true;
+                flag = true;
             }
         }
         else{
-            return true;
+            flag = true;
         }
-        return false;
+        return flag;
     }
 
     template <class T>
@@ -117,6 +118,7 @@ namespace polygon{
         bool seg1_seg0s = ToLeftTest_ISOL(segment1.p_start, segment1.p_end, segment0.p_start);
         bool seg1_seg0e = ToLeftTest_ISOL(segment1.p_start, segment1.p_end, segment0.p_end);
         printf("seg1 1se %d %d.\n", seg1_seg0s, seg1_seg0e);
+
         if((seg1_seg0s ^ seg1_seg0e) && flag0){
             return true;
         }

@@ -1,7 +1,7 @@
 #include "polygon_intersecting.h"
 #include <limits>
 
-#define debug true
+#define debug false
 
 #if debug
     #include <opencv2/core.hpp>
@@ -921,7 +921,7 @@ namespace polygon{
                 findminfirst = true;
             }
         }
-        if(firstDiff_Index==0){
+        if(firstDiff_Index == 0){
             firstDiff_Index = 1;
         }
         ++firstDiff_Index;
@@ -1213,7 +1213,15 @@ namespace polygon{
     
     template <class T>
     void PolygonIntersecting<T>::CalIntersectionBetweenTwoMonochainLine(MonotoneChain<T>& chain0, MonotoneChain<T>& chain1, int start0, int start1){
-        if(chain0.points_chain.size() <= 4 && chain1.points_chain.size() <= 4){// 都只剩下一条边的时候
+        printf("chain0 points: ...\n");
+        for(int i=0; i<chain0.points_chain.size(); ++i){
+            printf("chain0 is %lf %lf.\n", chain0.points_chain[i]->x, chain0.points_chain[i]->y);
+        }
+        printf("chain1 points: ...\n");
+        for(int i=0; i<chain1.points_chain.size(); ++i){
+            printf("chain1 is %lf %lf.\n", chain1.points_chain[i]->x, chain1.points_chain[i]->y);
+        }
+        if(chain0.points_chain.size() <= 4 && chain1.points_chain.size() <= 4){// 都只剩下最多三条边的时候
             // 判断当前是否存在交点，并计算交点位置
             printf("run in the chain edge size <= 3 and point size <= 4 %d %d.\n", (int)chain0.points_chain.size(), (int)chain1.points_chain.size());
             if(chain0.points_chain.size() == 0 || chain1.points_chain.size() == 0){
@@ -1231,21 +1239,22 @@ namespace polygon{
             for(int i=0; i<chain1.points_chain.size()-1; ++i){
                 cv::line(image5, cv::Point2d(50 + 10 * chain1.points_chain[i]->x, 550 - 10 * chain1.points_chain[i]->y), cv::Point2d(50 + 10 * chain1.points_chain[i+1]->x, 550 - 10 * chain1.points_chain[i+1]->y), 255, 1);
             }
-            cv::imshow("debug image", image5);
-            cv::waitKey(1);
+            cv::imshow("debug image debug", image5);
+            cv::waitKey(0);
 #endif
             for(int p0 = 0; p0<chain0.points_chain.size()-1; ++p0){
+                extreme_edge_t<T> midedge0;
+                midedge0.p_start = chain0.points_chain[p0];
+                midedge0.p_end = chain0.points_chain[p0+1];
                 for(int p1=0; p1<chain1.points_chain.size()-1; ++p1){
-                    extreme_edge_t<T> midedge0, midedge1;
-                    midedge0.p_start = chain0.points_chain[p0];
-                    midedge0.p_end = chain0.points_chain[p0+1];
+                    extreme_edge_t<T> midedge1;
                     midedge1.p_start = chain1.points_chain[p1];
                     midedge1.p_end = chain1.points_chain[p1+1];
 
                     if (IsLineIntersecting(midedge0, midedge1))
                     {
                         // has ， find the point and save into vector
-                        printf("line has intersection. edge is %d %d \n", p0, p1);
+                        printf("line has intersection. edge is %d %d+++++++++++++++++++++++++++++++++++ \n", p0, p1);
                         point2d_t<T> *inter = new point2d_t<T>(0, 0);
                         bool issucc = CalRealIntersectionPosition(midedge0, midedge1, inter);
                         if (issucc)
@@ -1267,10 +1276,10 @@ namespace polygon{
         else{
             // 几种状态，需要分别判断，分支递归或者直接判断结果
             // no intersection
-            printf("run in the chain points intersection.\n");
+            // printf("run in the chain points intersection.\n");
             MonotoneChain<T> leftchain0, rightchain0, leftchain1, rightchain1;
             extreme_edge_t<T> midedge0, midedge1;
-            printf("before split chain0_1 size is %d %d.\n", (int)chain0.points_chain.size(), (int)chain1.points_chain.size());
+            // printf("before split chain0_1 size is %d %d.\n", (int)chain0.points_chain.size(), (int)chain1.points_chain.size());
         
             chain0.GetMidEdge(midedge0, leftchain0, rightchain0);
             chain1.GetMidEdge(midedge1, leftchain1, rightchain1);
@@ -1282,14 +1291,14 @@ namespace polygon{
             cv::line(image, cv::Point2d(50 + 10 * midedge0.p_start->x, 550 - 10 * midedge0.p_start->y), cv::Point2d(50 + 10 * midedge0.p_end->x, 550 - 10 * midedge0.p_end->y), 255, 1);
             cv::line(image, cv::Point2d(50 + 10 * midedge1.p_start->x, 550 - 10 * midedge1.p_start->y), cv::Point2d(50 + 10 * midedge1.p_end->x, 550 - 10 * midedge1.p_end->y), 255, 1);
             cv::imshow("debug image mid", image);
-            cv::waitKey(1);
 #endif
             if(IsLineIntersecting(midedge0, midedge1)){
-                printf("line has intersecting...\n");
+                // printf("line has intersecting...\n");
                 point2d_t<T>* inter = new point2d_t<T>(0 ,0); 
                 bool issucc = CalRealIntersectionPosition(midedge0, midedge1, inter);
                 
                 if(issucc){
+                    printf("line has intersection, edge is %d %d===============================.\n", (int)((chain0.points_chain.size()-1)/2), (int)((chain1.points_chain.size()-1)/2));
                     extremeedge_index_t indexes; // 在这个位置的点和后面一个点之间的边会存在一个交点
                     indexes.first_index = start0+(chain0.points_chain.size()-1)/2;
                     indexes.second_index = start1+(chain1.points_chain.size()-1)/2;
@@ -1298,26 +1307,54 @@ namespace polygon{
                 else{
                     delete inter;
                     // 没有相交，则把mid的端点，加入left 和 right中。
+                
+                }
+            }
+            else{
+                // printf("0 insert before chain size is %d.\n", (int)rightchain0.points_chain.size());
+                if(!rightchain0.points_chain.empty())
+                    rightchain0.points_chain.insert(rightchain0.points_chain.begin(), midedge0.p_start);
+                else{
                     rightchain0.points_chain.insert(rightchain0.points_chain.begin(), midedge0.p_start);
                     rightchain0.points_chain.insert(rightchain0.points_chain.begin(), midedge0.p_end);
+                }
+                // printf("0 insert after chain size is %d.\n", (int)rightchain0.points_chain.size());
+                // rightchain0.points_chain.insert(rightchain0.points_chain.begin(), midedge0.p_end);
+                // printf("0 insert after chain size is %d.\n", (int)rightchain0.points_chain.size());
+                // printf("1 insert before chain size is %d.\n", (int)rightchain1.points_chain.size());
+                if(!rightchain1.points_chain.empty())
+                    rightchain1.points_chain.insert(rightchain1.points_chain.begin(), midedge1.p_start);
+                else{
                     rightchain1.points_chain.insert(rightchain1.points_chain.begin(), midedge1.p_start);
                     rightchain1.points_chain.insert(rightchain1.points_chain.begin(), midedge1.p_end);
                 }
+                // printf("1 insert before chain size is %d.\n", (int)rightchain1.points_chain.size());
+                // rightchain1.points_chain.insert(rightchain1.points_chain.begin(), midedge1.p_end);
+                // printf("1 insert before chain size is %d.\n", (int)rightchain1.points_chain.size());
             }
-
 #if debug
+            cv::waitKey(0);
             cv::Mat image0(cv::Size(1200, 600), CV_8UC1, cv::Scalar(0));
-            for(int i=0; i<leftchain0.points_chain.size()-1; ++i){
-                cv::line(image0, cv::Point2d(50 + 10 * leftchain0.points_chain[i]->x, 550 - 10 * leftchain0.points_chain[i]->y), cv::Point2d(50 + 10 * leftchain0.points_chain[i+1]->x, 550 - 10 * leftchain0.points_chain[i+1]->y), 255, 1);
+            // printf("run in 00 show. leftchain0.points_chain size is %d.\n", (int)leftchain0.points_chain.size());
+            if(!leftchain0.points_chain.empty())
+            for (int i = 0; i < leftchain0.points_chain.size() - 1; ++i)
+            {
+                cv::line(image0, cv::Point2d(50 + 10 * leftchain0.points_chain[i]->x, 550 - 10 * leftchain0.points_chain[i]->y), cv::Point2d(50 + 10 * leftchain0.points_chain[i + 1]->x, 550 - 10 * leftchain0.points_chain[i + 1]->y), 255, 1);
             }
+            // printf("run in 00 show. leftchain1.points_chain size is %d.\n", (int)leftchain1.points_chain.size());
+            if(!leftchain1.points_chain.empty())
             for(int i=0; i<leftchain1.points_chain.size()-1; ++i){
                 cv::line(image0, cv::Point2d(50 + 10 * leftchain1.points_chain[i]->x, 550 - 10 * leftchain1.points_chain[i]->y), cv::Point2d(50 + 10 * leftchain1.points_chain[i+1]->x, 550 - 10 * leftchain1.points_chain[i+1]->y), 255, 1);
             }
+            // printf("run end 00 show.\n");
             cv::imshow("debug image", image0);
-            cv::waitKey(1);
 #endif
             if (PotentionIntersection(leftchain0, leftchain1)){
+                int tempsize = intersections_.size();
                 CalIntersectionBetweenTwoMonochainLine(leftchain0, leftchain1, 0, 0);
+                if(tempsize == intersections_.size()){
+                    printf("intersection not increase, no new intersection.\n");
+                }
                 printf("accept this 00 result.\n");
             }
             else{
@@ -1325,15 +1362,21 @@ namespace polygon{
             }
 
 #if debug
+            cv::waitKey(0);
+            // printf("run in 01 show.\n");
             cv::Mat image1(cv::Size(1200, 600), CV_8UC1, cv::Scalar(0));
+            // printf("run in 01 show. leftchain0.points_chain size is %d.\n", (int)leftchain0.points_chain.size());
+            if(!leftchain0.points_chain.empty())
             for(int i=0; i<leftchain0.points_chain.size()-1; ++i){
                 cv::line(image1, cv::Point2d(50 + 10 * leftchain0.points_chain[i]->x, 550 - 10 * leftchain0.points_chain[i]->y), cv::Point2d(50 + 10 * leftchain0.points_chain[i+1]->x, 550 - 10 * leftchain0.points_chain[i+1]->y), 255, 1);
             }
+            // printf("run in 01 show. rightchain1.points_chain size is %d.\n", (int)rightchain1.points_chain.size());
+            if(!rightchain1.points_chain.empty())
             for(int i=0; i<rightchain1.points_chain.size()-1; ++i){
                 cv::line(image1, cv::Point2d(50 + 10 * rightchain1.points_chain[i]->x, 550 - 10 * rightchain1.points_chain[i]->y), cv::Point2d(50 + 10 * rightchain1.points_chain[i+1]->x, 550 - 10 * rightchain1.points_chain[i+1]->y), 255, 1);
             }
+            // printf("run end 01 show.\n");
             cv::imshow("debug image", image1);
-            cv::waitKey(1);
 #endif
 
             if (PotentionIntersection(leftchain0, rightchain1)){
@@ -1345,15 +1388,22 @@ namespace polygon{
             }
 
 #if debug
+            cv::waitKey(0);
+            // printf("run in 10 show.\n");
             cv::Mat image2(cv::Size(1200, 600), CV_8UC1, cv::Scalar(0));
+            // printf("run in 10 show. rightchain0.points_chain size is %d.\n", (int)rightchain0.points_chain.size());
+            if(!rightchain0.points_chain.empty())
             for(int i=0; i<rightchain0.points_chain.size()-1; ++i){
                 cv::line(image2, cv::Point2d(50 + 10 * rightchain0.points_chain[i]->x, 550 - 10 * rightchain0.points_chain[i]->y), cv::Point2d(50 + 10 * rightchain0.points_chain[i+1]->x, 550 - 10 * rightchain0.points_chain[i+1]->y), 255, 1);
             }
+            // printf("run in 10 show. leftchain0.points_chain size is %d.\n", (int)leftchain1.points_chain.size());
+            if(!leftchain1.points_chain.empty())
             for(int i=0; i<leftchain1.points_chain.size()-1; ++i){
                 cv::line(image2, cv::Point2d(50 + 10 * leftchain1.points_chain[i]->x, 550 - 10 * leftchain1.points_chain[i]->y), cv::Point2d(50 + 10 * leftchain1.points_chain[i+1]->x, 550 - 10 * leftchain1.points_chain[i+1]->y), 255, 1);
             }
+            // printf("run end 10 show.\n");
             cv::imshow("debug image", image2);
-            cv::waitKey(1);
+            
 #endif
             
 
@@ -1365,15 +1415,21 @@ namespace polygon{
                 printf("rejust this 10 result.\n");
             }
 #if debug
+            cv::waitKey(0);
+            // printf("run in 11 show.\n");
             cv::Mat image3(cv::Size(1200, 600), CV_8UC1, cv::Scalar(0));
+            // printf("run in 11 show. rightchain0.points_chain size is %d.\n", (int)rightchain0.points_chain.size());
+            if(!rightchain0.points_chain.empty())
             for(int i=0; i<rightchain0.points_chain.size()-1; ++i){
                 cv::line(image3, cv::Point2d(50 + 10 * rightchain0.points_chain[i]->x, 550 - 10 * rightchain0.points_chain[i]->y), cv::Point2d(50 + 10 * rightchain0.points_chain[i+1]->x, 550 - 10 * rightchain0.points_chain[i+1]->y), 255, 1);
             }
+            // printf("run in 11 show. rightchain1.points_chain size is %d.\n", (int)rightchain1.points_chain.size());
+            if(!rightchain1.points_chain.empty())
             for(int i=0; i<rightchain1.points_chain.size()-1; ++i){
                 cv::line(image3, cv::Point2d(50 + 10 * rightchain1.points_chain[i]->x, 550 - 10 * rightchain1.points_chain[i]->y), cv::Point2d(50 + 10 * rightchain1.points_chain[i+1]->x, 550 - 10 * rightchain1.points_chain[i+1]->y), 255, 1);
             }
+            // printf("run end 11 show.\n");
             cv::imshow("debug image", image3);
-            cv::waitKey(1);
 #endif
             
             if (PotentionIntersection(rightchain0, rightchain1)){
@@ -1382,7 +1438,11 @@ namespace polygon{
             }
             else{
                 printf("rejust this 11 result.\n");
-            }       
+            }
+#if debug
+            cv::waitKey(0);
+
+#endif
             return;
         }
 

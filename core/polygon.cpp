@@ -148,7 +148,7 @@ namespace polygon{
         return flag;
     }
 
-
+    
     template<class T>
     Polygon<T>::Polygon(std::vector<point2d_t<T>>& setpoints){
         points_.resize(setpoints.size(), nullptr);

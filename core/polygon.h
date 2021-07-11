@@ -2,7 +2,8 @@
 
 #include <atomic>
 #include <vector>
-
+#include <stdio.h>
+#include <iostream>
 /**
  * 
  * 
@@ -103,6 +104,14 @@ public:
 
     T GetExIndexX(int idx){return extreme_points_[idx]->x;}
     T GetExIndexY(int idx){return extreme_points_[idx]->y;}
+
+    void GetExtremeEdge(int index, extreme_edge_t<T>& exedge){
+        if(index < 0 || index >= extreme_edges_.size()){
+            printf("error, please input the index in the exedge container (out of bound).\n");
+            std::exit(-1);
+        }
+        exedge = extreme_edges_[index];
+    }
 private:
     std::vector<point2d_t<T>*> points_;
     std::vector<point2d_t<T>*> extreme_points_;

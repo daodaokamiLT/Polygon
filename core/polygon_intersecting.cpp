@@ -62,6 +62,51 @@ namespace polygon
     }
 
     template <class T>
+    bool MonotoneChain<T>::GetMidEdge(extreme_edge_t<T> &midedge, MonotoneChain<T> &monochan_before, MonotoneChain<T> &monochain_after, int& before_start_index, int& after_start_index)
+    {
+        int size = points_chain.size();
+        PolygonPrintf("points chain size is %d.\n", size);
+        if (size == 1)
+        {
+            PolygonPrintf("error cannot create a edge and the chain never be 1 point, because that cannot create a line.\n");
+            exit(-1);
+        }
+        if (size == 2)
+        {
+            midedge.p_start = points_chain[0];
+            midedge.p_end = points_chain[1];
+            return true;
+        }
+        // 边数比点数少1
+        int mid = (int)(size - 1) / 2;
+        PolygonPrintf("mid is %d.\n", mid);
+        bool issucc = this->GetEdge(mid, midedge);
+        if (!issucc)
+        {
+            PolygonPrintf("error, failed GetEdge.\n");
+            exit(-1);
+        }
+        // 按照这个chain的顺序来排列的
+        if (mid != 0)
+        {
+            before_start_index = 0;
+            for (int i = 0; i <= mid; ++i)
+            {
+                monochan_before.points_chain.emplace_back(points_chain[i]);
+            }
+        }
+        if (mid + 1 != size - 1)
+        {
+            after_start_index = mid+1;
+            for (int i = mid + 1; i < size; ++i)
+            {
+                monochain_after.points_chain.emplace_back(points_chain[i]);
+            }
+        }
+        return issucc;
+    }
+
+    template <class T>
     void findextreme(MonotoneChain<T> &monochain, linepoint2d_t<T> &p_left, linepoint2d_t<T> &p_right, linepoint2d_t<T> &p_up, linepoint2d_t<T> &p_down)
     {
         T min_x = std::numeric_limits<T>::max(), max_x = std::numeric_limits<T>::min(), min_y = std::numeric_limits<T>::max(), max_y = std::numeric_limits<T>::min();
@@ -603,28 +648,36 @@ namespace polygon
         if (firstDiff_Index == endthreshold)
         {
             // minfirst 是第一次找到的是minx， 然后从min->max, 那么优先的是right monochain
+            if(findminfirst){
+                index_rightfirst_inrightfirstchain_xbase_ = 0;
+                index_leftfirst_inleftfirstchain_xbase_ = firstDiff_Index-2;
+            }
+            else{
+                index_leftfirst_inleftfirstchain_xbase_ = 0;
+                index_rightfirst_inrightfirstchain_xbase_ = firstDiff_Index-2;
+            }
             for (int i = 0; i < firstDiff_Index - 1; ++i)
             {
                 if (findminfirst)
                 {
-                    leftfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[i]);
+                    rightfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[i]);
                 }
                 else
                 {
-                    rightfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[i]);
+                    leftfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[i]);
                 }
             }
             if (findminfirst)
             {
-                rightfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[firstDiff_Index - 2]);
-                rightfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[firstDiff_Index - 1]);
-                rightfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[0]);
-            }
-            else
-            {
                 leftfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[firstDiff_Index - 2]);
                 leftfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[firstDiff_Index - 1]);
                 leftfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[0]);
+            }
+            else
+            {
+                rightfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[firstDiff_Index - 2]);
+                rightfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[firstDiff_Index - 1]);
+                rightfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[0]);
             }
         }
         // 定理： 一个循环有序队列中，最大值和最小值的index 不可能都在端点, 除非一条直线的情况加一个点的情况
@@ -647,8 +700,12 @@ namespace polygon
                     PolygonPrintf("minx0_expoint %d-1 is %lf %lf.\n", i - 1, expoints_first[temp]->x, expoints_first[temp]->y);
                     PolygonPrintf("minx0_expoint %d is %lf %lf.\n", i - 1, expoints_first[i - 1]->x, expoints_first[i - 1]->y);
                     PolygonPrintf("minx0_expoint %d+1 is %lf %lf.\n", i - 1, expoints_first[i]->x, expoints_first[i]->y);
+                    
                     minx0_index = i - 1;
                     minx0_expoint = expoints_first[minx0_index];
+
+                    index_rightfirst_inrightfirstchain_xbase_ = minx0_index;
+
                     int count = minx0_index;
                     int next_count = count + 1;
                     if (next_count == endthreshold)
@@ -663,10 +720,14 @@ namespace polygon
                         if (next_count == endthreshold)
                             next_count = 0;
                     }
+                    
                     // 把min 也放进来
                     rightfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[count]);
                     leftfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[count]);
 
+                    index_leftfirst_inleftfirstchain_xbase_ = count;
+
+#if debug
                     temp = count - 1;
                     if (temp < 0)
                     {
@@ -680,6 +741,7 @@ namespace polygon
                     PolygonPrintf("maxx0_expoint %d-1 is %lf %lf.\n", count, expoints_first[temp]->x, expoints_first[temp]->y);
                     PolygonPrintf("maxx0_expoint %d is %lf %lf.\n", count, expoints_first[count]->x, expoints_first[count]->y);
                     PolygonPrintf("maxx0_expoint %d+1 is %lf %lf.\n", count, expoints_first[temp1]->x, expoints_first[temp1]->y);
+#endif
                     // maxx0_index = next_count;
                     maxx0_index = count;
                     maxx0_expoint = expoints_first[maxx0_index];
@@ -708,6 +770,9 @@ namespace polygon
                     // 找到最小值，接下来，把所有当前最小值之后递增的pushinto rightfirst_monochain
                     maxx0_index = i - 1;
                     maxx0_expoint = expoints_first[maxx0_index];
+
+                    index_leftfirst_inleftfirstchain_xbase_ = maxx0_index;
+
                     int count = maxx0_index;
                     int next_count = count + 1;
                     if (next_count == endthreshold)
@@ -724,6 +789,8 @@ namespace polygon
                     }
                     leftfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[count]);
                     rightfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[count]);
+
+                    index_rightfirst_inrightfirstchain_xbase_ = count;
 
                     // minx0_index = next_count;
                     minx0_index = count;
@@ -787,28 +854,36 @@ namespace polygon
         {
             PolygonPrintf("run in here firstDiff_index = endthreshold.\n");
             // minfirst 是第一次找到的是minx， 然后从min->max, 那么优先的是right monochain
+            if(findminfirst){
+                index_rightfirst_inrightfirstchain_ybase_ = 0;
+                index_leftfirst_inleftfirstchain_ybase_ = firstDiff_Index-2;
+            }
+            else{
+                index_leftfirst_inleftfirstchain_ybase_ = 0;
+                index_rightfirst_inrightfirstchain_ybase_ = firstDiff_Index-2;
+            }
             for (int i = 0; i < firstDiff_Index - 1; ++i)
             {
                 if (findminfirst)
                 {
-                    leftfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[i]);
+                    rightfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[i]);
                 }
                 else
                 {
-                    rightfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[i]);
+                    leftfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[i]);
                 }
             }
             if (findminfirst)
             {
-                rightfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[firstDiff_Index - 2]);
-                rightfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[firstDiff_Index - 1]);
-                rightfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[0]);
-            }
-            else
-            {
                 leftfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[firstDiff_Index - 2]);
                 leftfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[firstDiff_Index - 1]);
                 leftfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[0]);
+            }
+            else
+            {
+                rightfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[firstDiff_Index - 2]);
+                rightfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[firstDiff_Index - 1]);
+                rightfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[0]);
             }
         }
         // 定理： 一个循环有序队列中，最大值和最小值的index 不可能都在端点, 除非一条直线的情况加一个点的情况
@@ -829,6 +904,9 @@ namespace polygon
                     // 当出现第一个小于的值时，找到最大值。接下来，将所当前最大值和之后所有递减的push into leftfirst_monochain
                     miny0_index = i - 1;
                     miny0_expoint = expoints_first[miny0_index];
+                    
+                    index_rightfirst_inrightfirstchain_ybase_ = miny0_index;
+                    
                     int count = miny0_index;
                     int next_count = count + 1;
                     if (next_count == endthreshold)
@@ -846,6 +924,9 @@ namespace polygon
                     // 把min 也放进来
                     rightfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[count]);
                     leftfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[count]);
+
+                    index_leftfirst_inleftfirstchain_ybase_ = count;
+
                     // maxy0_index = next_count;
                     maxy0_index = count;
                     maxy0_expoint = expoints_first[maxy0_index];
@@ -876,6 +957,9 @@ namespace polygon
                     // 找到最小值，接下来，把所有当前最小值之后递增的pushinto rightfirst_monochain
                     maxy0_index = i - 1;
                     maxy0_expoint = expoints_first[maxy0_index];
+
+                    index_leftfirst_inleftfirstchain_ybase_ = maxy0_index;
+
                     int count = maxy0_index;
                     int next_count = count + 1;
                     if (next_count == endthreshold)
@@ -893,6 +977,8 @@ namespace polygon
                     }
                     leftfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[count]);
                     rightfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[count]);
+                    
+                    index_rightfirst_inrightfirstchain_ybase_ = count;
 
                     // miny0_index = next_count;
                     miny0_index = count;
@@ -978,28 +1064,36 @@ namespace polygon
         if (firstDiff_Index == endthreshold)
         {
             // minfirst 是第一次找到的是minx， 然后从min->max, 那么优先的是right monochain
+            if(findminfirst){
+                index_rightfirst_inrightsecondchain_xbase_ = 0;
+                index_leftfirst_inleftsecondchain_xbase_ = firstDiff_Index-2;
+            }
+            else{
+                index_leftfirst_inleftsecondchain_xbase_ = 0;
+                index_rightfirst_inrightsecondchain_xbase_ = firstDiff_Index-2;
+            }
             for (int i = 0; i < firstDiff_Index - 1; ++i)
             {
                 if (findminfirst)
                 {
-                    leftsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[i]);
+                    rightsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[i]);
                 }
                 else
                 {
-                    rightsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[i]);
+                    leftsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[i]);
                 }
             }
             if (findminfirst)
             {
-                rightsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[firstDiff_Index - 2]);
-                rightsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[firstDiff_Index - 1]);
-                rightsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[0]);
-            }
-            else
-            {
                 leftsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[firstDiff_Index - 2]);
                 leftsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[firstDiff_Index - 1]);
                 leftsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[0]);
+            }
+            else
+            {
+                rightsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[firstDiff_Index - 2]);
+                rightsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[firstDiff_Index - 1]);
+                rightsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[0]);
             }
         }
         // 定理： 一个循环有序队列中，最大值和最小值的index 不可能都在端点, 除非一条直线的情况加一个点的情况
@@ -1012,6 +1106,9 @@ namespace polygon
                     // 当出现第一个小于的值时，找到最大值。接下来，将所当前最大值和之后所有递减的push into leftsecond_monochain
                     minx1_index = i - 1;
                     minx1_expoint = expoints_second[minx1_index];
+
+                    index_rightfirst_inrightsecondchain_xbase_ = minx1_index;
+
                     int count = minx1_index;
                     int next_count = count + 1;
                     if (next_count == endthreshold)
@@ -1029,6 +1126,8 @@ namespace polygon
                     // 把min 也放进来
                     rightsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[count]);
                     leftsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[count]);
+
+                    index_leftfirst_inleftsecondchain_xbase_ = count;
 
                     // maxx1_index = next_count;
                     maxx1_index = count;
@@ -1056,6 +1155,10 @@ namespace polygon
                     // 找到最小值，接下来，把所有当前最小值之后递增的pushinto rightsecond_monochain
                     maxx1_index = i - 1;
                     maxx1_expoint = expoints_second[maxx1_index];
+
+                    index_leftfirst_inleftsecondchain_xbase_ = maxx1_index;
+
+
                     int count = maxx1_index;
                     int next_count = count + 1;
                     if (next_count == endthreshold)
@@ -1072,6 +1175,8 @@ namespace polygon
                     }
                     leftsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[count]);
                     rightsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[count]);
+
+                    index_rightfirst_inrightsecondchain_xbase_ = count;
 
                     minx1_index = count;
                     minx1_expoint = expoints_second[minx1_index];
@@ -1134,28 +1239,36 @@ namespace polygon
         {
             PolygonPrintf("run in here, firstDiff_index == endthreshold.\n");
             // minfirst 是第一次找到的是minx， 然后从min->max, 那么优先的是right monochain
+            if(findminfirst){
+                index_rightfirst_inrightsecondchain_ybase_ = 0;
+                index_leftfirst_inleftsecondchain_ybase_ = firstDiff_Index-2;
+            }
+            else{
+                index_leftfirst_inleftsecondchain_ybase_ = 0;
+                index_rightfirst_inrightsecondchain_ybase_ = firstDiff_Index-2;
+            }
             for (int i = 0; i < firstDiff_Index - 1; ++i)
             {
                 if (findminfirst)
                 {
-                    leftsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[i]);
+                    rightsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[i]);
                 }
                 else
                 {
-                    rightsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[i]);
+                    leftsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[i]);
                 }
             }
             if (findminfirst)
             {
-                rightsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[firstDiff_Index - 2]);
-                rightsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[firstDiff_Index - 1]);
-                rightsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[0]);
-            }
-            else
-            {
                 leftsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[firstDiff_Index - 2]);
                 leftsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[firstDiff_Index - 1]);
                 leftsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[0]);
+            }
+            else
+            {
+                rightsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[firstDiff_Index - 2]);
+                rightsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[firstDiff_Index - 1]);
+                rightsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[0]);
             }
         }
         // 定理： 一个循环有序队列中，最大值和最小值的index 不可能都在端点, 除非一条直线的情况加一个点的情况
@@ -1169,6 +1282,9 @@ namespace polygon
                     // 当出现第一个小于的值时，找到最大值。接下来，将所当前最大值和之后所有递减的push into leftsecond_monochain
                     miny1_index = i - 1;
                     miny1_expoint = expoints_second[miny1_index];
+
+                    index_rightfirst_inrightsecondchain_ybase_ = miny1_index;
+
                     int count = miny1_index;
                     int next_count = count + 1;
                     if (next_count == endthreshold)
@@ -1188,6 +1304,8 @@ namespace polygon
                     // 把min 也放进来
                     rightsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[count]);
                     leftsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[count]);
+
+                    index_leftfirst_inleftsecondchain_ybase_ = count;
 
                     // maxy1_index = next_count;
                     maxy1_index = count;
@@ -1217,8 +1335,13 @@ namespace polygon
                     // 找到最小值，接下来，把所有当前最小值之后递增的pushinto rightsecond_monochain
                     maxy1_index = i - 1;
                     maxy1_expoint = expoints_second[maxy1_index];
+
+                    index_leftfirst_inleftsecondchain_ybase_ = maxy1_index;
+
+
                     int count = maxy1_index;
                     int next_count = count + 1;
+
                     if (next_count == endthreshold)
                     {
                         next_count = 0;
@@ -1235,6 +1358,8 @@ namespace polygon
                     }
                     leftsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[count]);
                     rightsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[count]);
+
+                    index_rightfirst_inrightsecondchain_ybase_ = count;
 
                     // miny1_index = next_count;
                     miny1_index = count;
@@ -1445,49 +1570,49 @@ namespace polygon
             {
                 /* code */
                 PolygonPrintf("run at %s.\n", tag.c_str());
-                CalIntersectionBetweenTwoMonochainLine(leftfirst_monochain_xbase_, leftsecond_monochain_xbase_, 0, 0);
+                CalIntersectionBetweenTwoMonochainLine(leftfirst_monochain_xbase_, leftsecond_monochain_xbase_, index_leftfirst_inleftfirstchain_xbase_, index_leftfirst_inleftsecondchain_xbase_);
             }
             if (tag == "001")
             {
                 /* code */
                 PolygonPrintf("run at %s.\n", tag.c_str());
-                CalIntersectionBetweenTwoMonochainLine(leftfirst_monochain_xbase_, rightsecond_monochain_xbase_, 0, 0);
+                CalIntersectionBetweenTwoMonochainLine(leftfirst_monochain_xbase_, rightsecond_monochain_xbase_, index_leftfirst_inleftfirstchain_xbase_, index_rightfirst_inrightsecondchain_xbase_);
             }
             if (tag == "010")
             {
                 /* code */
                 PolygonPrintf("run at %s.\n", tag.c_str());
-                CalIntersectionBetweenTwoMonochainLine(rightfirst_monochain_xbase_, leftsecond_monochain_xbase_, 0, 0);
+                CalIntersectionBetweenTwoMonochainLine(rightfirst_monochain_xbase_, leftsecond_monochain_xbase_, index_rightfirst_inrightfirstchain_xbase_, index_leftfirst_inleftsecondchain_xbase_);
             }
             if (tag == "011")
             {
                 /* code */
                 PolygonPrintf("run at %s.\n", tag.c_str());
-                CalIntersectionBetweenTwoMonochainLine(rightfirst_monochain_xbase_, rightsecond_monochain_xbase_, 0, 0);
+                CalIntersectionBetweenTwoMonochainLine(rightfirst_monochain_xbase_, rightsecond_monochain_xbase_, index_rightfirst_inrightfirstchain_xbase_, index_rightfirst_inrightsecondchain_xbase_);
             }
             if (tag == "100")
             {
                 /* code */
                 PolygonPrintf("run at %s.\n", tag.c_str());
-                CalIntersectionBetweenTwoMonochainLine(leftfirst_monochain_ybase_, leftsecond_monochain_ybase_, 0, 0);
+                CalIntersectionBetweenTwoMonochainLine(leftfirst_monochain_ybase_, leftsecond_monochain_ybase_, index_leftfirst_inleftfirstchain_ybase_, index_leftfirst_inleftsecondchain_ybase_);
             }
             if (tag == "101")
             {
                 /* code */
                 PolygonPrintf("run at %s.\n", tag.c_str());
-                CalIntersectionBetweenTwoMonochainLine(leftfirst_monochain_ybase_, rightsecond_monochain_ybase_, 0, 0);
+                CalIntersectionBetweenTwoMonochainLine(leftfirst_monochain_ybase_, rightsecond_monochain_ybase_, index_leftfirst_inleftfirstchain_ybase_, index_rightfirst_inrightsecondchain_ybase_);
             }
             if (tag == "110")
             {
                 /* code */
                 PolygonPrintf("run at %s.\n", tag.c_str());
-                CalIntersectionBetweenTwoMonochainLine(rightfirst_monochain_ybase_, leftsecond_monochain_ybase_, 0, 0);
+                CalIntersectionBetweenTwoMonochainLine(rightfirst_monochain_ybase_, leftsecond_monochain_ybase_, index_rightfirst_inrightfirstchain_ybase_, index_leftfirst_inleftsecondchain_ybase_);
             }
             if (tag == "111")
             {
                 /* code */
                 PolygonPrintf("run at %s.\n", tag.c_str());
-                CalIntersectionBetweenTwoMonochainLine(rightfirst_monochain_ybase_, rightsecond_monochain_ybase_, 0, 0);
+                CalIntersectionBetweenTwoMonochainLine(rightfirst_monochain_ybase_, rightsecond_monochain_ybase_, index_rightfirst_inrightfirstchain_ybase_, index_rightfirst_inrightsecondchain_ybase_);
             }
         }
     }
@@ -1495,6 +1620,7 @@ namespace polygon
     template <class T>
     void PolygonIntersecting<T>::CalIntersectionBetweenTwoMonochainLine(MonotoneChain<T> &chain0, MonotoneChain<T> &chain1, int start0, int start1)
     {
+#if debug
         PolygonPrintf("chain0 points: ...\n");
         for (int i = 0; i < chain0.points_chain.size(); ++i)
         {
@@ -1505,6 +1631,7 @@ namespace polygon
         {
             PolygonPrintf("chain1 is %lf %lf.\n", chain1.points_chain[i]->x, chain1.points_chain[i]->y);
         }
+#endif
         if (chain0.points_chain.size() <= 4 && chain1.points_chain.size() <= 4)
         { // 都只剩下最多三条边的时候
             // 判断当前是否存在交点，并计算交点位置
@@ -1556,8 +1683,8 @@ namespace polygon
                         if (issucc)
                         {
                             extremeedge_index_t indexes;
-                            indexes.first_index = start0;
-                            indexes.second_index = start1;
+                            indexes.first_index = start0+p0;
+                            indexes.second_index = start1+p1;
                             intersections_.emplace_back(std::make_pair(indexes, inter));
                         }
                         else
@@ -1577,9 +1704,16 @@ namespace polygon
             MonotoneChain<T> leftchain0, rightchain0, leftchain1, rightchain1;
             extreme_edge_t<T> midedge0, midedge1;
             // PolygonPrintf("before split chain0_1 size is %d %d.\n", (int)chain0.points_chain.size(), (int)chain1.points_chain.size());
-
-            chain0.GetMidEdge(midedge0, leftchain0, rightchain0);
-            chain1.GetMidEdge(midedge1, leftchain1, rightchain1);
+            int left0_start=-1, right0_start=-1, left1_start= -1, right1_start = -1;
+            chain0.GetMidEdge(midedge0, leftchain0, rightchain0, left0_start, right0_start);
+            chain1.GetMidEdge(midedge1, leftchain1, rightchain1, left1_start, right1_start);
+            /**
+             * @brief @todo
+             * 下方还需要更新right0 和 right1 
+             * 可能还要 - 1
+             * 
+            */
+            (chain1.points_chain.size() - 1) / 2;
             if (midedge0.p_end == nullptr || midedge1.p_end == nullptr)
             {
                 return;
@@ -1613,24 +1747,33 @@ namespace polygon
             else
             {
                 // PolygonPrintf("0 insert before chain size is %d.\n", (int)rightchain0.points_chain.size());
-                if (!rightchain0.points_chain.empty())
-                    rightchain0.points_chain.insert(rightchain0.points_chain.begin(), midedge0.p_start);
-                else
+                if (rightchain0.points_chain.empty())
                 {
                     rightchain0.points_chain.insert(rightchain0.points_chain.begin(), midedge0.p_start);
                     rightchain0.points_chain.insert(rightchain0.points_chain.begin(), midedge0.p_end);
+                    right0_start = 0;
                 }
+                else{
+                    rightchain0.points_chain.insert(rightchain0.points_chain.begin(), midedge0.p_start);
+                    --right0_start;
+                }
+        
                 // PolygonPrintf("0 insert after chain size is %d.\n", (int)rightchain0.points_chain.size());
                 // rightchain0.points_chain.insert(rightchain0.points_chain.begin(), midedge0.p_end);
                 // PolygonPrintf("0 insert after chain size is %d.\n", (int)rightchain0.points_chain.size());
                 // PolygonPrintf("1 insert before chain size is %d.\n", (int)rightchain1.points_chain.size());
-                if (!rightchain1.points_chain.empty())
-                    rightchain1.points_chain.insert(rightchain1.points_chain.begin(), midedge1.p_start);
-                else
+                if (rightchain1.points_chain.empty())
                 {
+                    
                     rightchain1.points_chain.insert(rightchain1.points_chain.begin(), midedge1.p_start);
                     rightchain1.points_chain.insert(rightchain1.points_chain.begin(), midedge1.p_end);
+                    right1_start = 0;
+                }    
+                else{
+                    rightchain1.points_chain.insert(rightchain1.points_chain.begin(), midedge1.p_start);
+                    --right1_start;
                 }
+                
                 // PolygonPrintf("1 insert before chain size is %d.\n", (int)rightchain1.points_chain.size());
                 // rightchain1.points_chain.insert(rightchain1.points_chain.begin(), midedge1.p_end);
                 // PolygonPrintf("1 insert before chain size is %d.\n", (int)rightchain1.points_chain.size());
@@ -1638,6 +1781,7 @@ namespace polygon
 #if debug
 #if waitkey
             cv::waitKey(0);
+
 #else
             cv::waitKey(1);
 #endif 
@@ -1660,7 +1804,7 @@ namespace polygon
             if (PotentionIntersection(leftchain0, leftchain1))
             {
                 int tempsize = intersections_.size();
-                CalIntersectionBetweenTwoMonochainLine(leftchain0, leftchain1, 0, 0);
+                CalIntersectionBetweenTwoMonochainLine(leftchain0, leftchain1, start0+left0_start, start1+left1_start);
                 if (tempsize == intersections_.size())
                 {
                     PolygonPrintf("intersection not increase, no new intersection.\n");
@@ -1698,7 +1842,7 @@ namespace polygon
 
             if (PotentionIntersection(leftchain0, rightchain1))
             {
-                CalIntersectionBetweenTwoMonochainLine(leftchain0, rightchain1, 0, 0);
+                CalIntersectionBetweenTwoMonochainLine(leftchain0, rightchain1, left0_start, right1_start);
                 PolygonPrintf("accept this 01 result.\n");
             }
             else
@@ -1732,7 +1876,7 @@ namespace polygon
 
             if (PotentionIntersection(rightchain0, leftchain1))
             {
-                CalIntersectionBetweenTwoMonochainLine(rightchain0, leftchain1, 0, 0);
+                CalIntersectionBetweenTwoMonochainLine(rightchain0, leftchain1, right0_start, left1_start);
                 PolygonPrintf("accept this 10 result.\n");
             }
             else
@@ -1764,7 +1908,7 @@ namespace polygon
 #endif
             if (PotentionIntersection(rightchain0, rightchain1))
             {
-                CalIntersectionBetweenTwoMonochainLine(rightchain0, rightchain1, 0, 0);
+                CalIntersectionBetweenTwoMonochainLine(rightchain0, rightchain1, right0_start, right1_start);
                 PolygonPrintf("accept this 11 result.\n");
             }
             else
@@ -1825,90 +1969,9 @@ namespace polygon
             return false;
         }
     }
+
+    template <class T>
+    void PolygonIntersecting<T>::ReconstructionIntersectionPolygon(){
+
+    }
 }
-
-// 这里设计没有设计好！！
-// 由于不知道tag 所以不能快速的进行x extremepoints 和 yextremepoints的分离。
-// T minx = std::numeric_limits<T>::max(), maxx = std::numeric_limits<T>::min(), miny = std::numeric_limits<T>::max(), maxy = std::numeric_limits<T>::min();
-// int leftchain0_minx_index, leftchain0_maxx_index, leftchain0_miny_index, leftchain0_maxy_index;
-// for(int i=0; i<leftchain0.points_chain.size(); ++i){
-//     if(minx > leftchain0.points_chain[i]->x){
-//         leftchain0_minx_index = i;
-//         minx = leftchain0.points_chain[i]->x;
-//     }
-//     if(miny > leftchain0.points_chain[i]->y){
-//         leftchain0_miny_index = i;
-//         miny = leftchain0.points_chain[i]->y;
-//     }
-//     if(maxx < leftchain0.points_chain[i]->x){
-//         leftchain0_maxx_index = i;
-//         maxx = leftchain0.points_chain[i]->x;
-//     }
-//     if(maxy < leftchain0.points_chain[i]->y){
-//         leftchain0_maxx_index = i;
-//         maxy = leftchain0.points_chain[i]->y;
-//     }
-// }
-// minx = std::numeric_limits<T>::max(), maxx = std::numeric_limits<T>::min(), miny = std::numeric_limits<T>::max(), maxy = std::numeric_limits<T>::min();
-// int rightchain0_minx_index, rightchain0_maxx_index, rightchain0_miny_index, rightchain0_maxy_index;
-// for(int i=0; i<rightchain0.points_chain.size(); ++i){
-//     if(minx > rightchain0.points_chain[i]->x){
-//         rightchain0_minx_index = i;
-//         minx = rightchain0.points_chain[i]->x;
-//     }
-//     if(miny > rightchain0.points_chain[i]->y){
-//         rightchain0_miny_index = i;
-//         miny = rightchain0.points_chain[i]->y;
-//     }
-//     if(maxx < rightchain0.points_chain[i]->x){
-//         rightchain0_maxx_index = i;
-//         maxx = rightchain0.points_chain[i]->x;
-//     }
-//     if(maxy < rightchain0.points_chain[i]->y){
-//         rightchain0_maxx_index = i;
-//         maxy = rightchain0.points_chain[i]->y;
-//     }
-// }
-
-// minx = std::numeric_limits<T>::max(), maxx = std::numeric_limits<T>::min(), miny = std::numeric_limits<T>::max(), maxy = std::numeric_limits<T>::min();
-// int leftchain1_minx_index, leftchain1_maxx_index, leftchain1_miny_index, leftchain1_maxy_index;
-// for(int i=0; i<rightchain1.points_chain.size(); ++i){
-//     if(minx > leftchain1.points_chain[i]->x){
-//         leftchain1_minx_index = i;
-//         minx = leftchain1.points_chain[i]->x;
-//     }
-//     if(miny > leftchain1.points_chain[i]->y){
-//         leftchain1_miny_index = i;
-//         miny = leftchain1.points_chain[i]->y;
-//     }
-//     if(maxx < leftchain1.points_chain[i]->x){
-//         leftchain1_maxx_index = i;
-//         maxx = leftchain1.points_chain[i]->x;
-//     }
-//     if(maxy < leftchain1.points_chain[i]->y){
-//         leftchain1_maxx_index = i;
-//         maxy = leftchain1.points_chain[i]->y;
-//     }
-// }
-// minx = std::numeric_limits<T>::max(), maxx = std::numeric_limits<T>::min(), miny = std::numeric_limits<T>::max(), maxy = std::numeric_limits<T>::min();
-// int rightchain1_minx_index, rightchain1_maxx_index, rightchain1_miny_index, rightchain1_maxy_index;
-// for(int i=0; i<rightchain1.points_chain.size(); ++i){
-//     if(minx > rightchain1.points_chain[i]->x){
-//         rightchain1_minx_index = i;
-//         minx = rightchain1.points_chain[i]->x;
-//     }
-//     if(miny > rightchain1.points_chain[i]->y){
-//         rightchain1_miny_index = i;
-//         miny = rightchain1.points_chain[i]->y;
-//     }
-//     if(maxx < rightchain1.points_chain[i]->x){
-//         rightchain1_maxx_index = i;
-//         maxx = rightchain1.points_chain[i]->x;
-//     }
-//     if(maxy < rightchain1.points_chain[i]->y){
-//         rightchain1_maxx_index = i;
-//         maxy = rightchain1.points_chain[i]->y;
-//     }
-// }
-// PolygonPrintf("run rePotentionIntersections intersections. leftchainlinepoints0,1 is (%d, %d).\n", (int)leftchainlinepoints0.size(), (int)leftchainlinepoints1.size());
-// 这里的问题是： 这里是两个chain之间可能性的比较，要自己创建sorted points

@@ -11,6 +11,8 @@ namespace polygon{
         std::vector<point2d_t<T>*> points_chain;
         int monochainid = 0;
         bool GetMidEdge(extreme_edge_t<T>& midedge, MonotoneChain<T>& monochan_before, MonotoneChain<T>& monochain_after);
+        bool GetMidEdge(extreme_edge_t<T> &midedge, MonotoneChain<T> &monochan_before, MonotoneChain<T> &monochain_after, int& before_start_index, int& after_start_index);
+
         bool GetEdge(int index, extreme_edge_t<T>& exedge){// start is 0
             if(index > points_chain.size()-1 || index < 0){
                 return false;
@@ -28,6 +30,15 @@ namespace polygon{
         int first_index;
         int second_index;
     };
+    
+    template <class T>
+    struct intersec_extremeedge_t{
+        intersec_extremeedge_t(){}
+        intersec_extremeedge_t(extreme_edge_t<T>& edge0, extreme_edge_t<T>& edge1) : first_edge(edge0), second_edge(edge1){}
+        extreme_edge_t<T> first_edge;
+        extreme_edge_t<T> second_edge;
+    };
+
     // 必须是两个单吊链
     template <class T>
     bool PotentionIntersection(MonotoneChain<T>& monochain0, MonotoneChain<T>& monochain1){
@@ -207,6 +218,7 @@ namespace polygon{
         return flag;
     }
     // just between two convex polygon.
+
     template <class T>
     class PolygonIntersecting{
         public:
@@ -261,6 +273,17 @@ namespace polygon{
                     interpoints.emplace_back(intersections_[i].second);
                 }
             }
+
+            void GetIntersectionEdges(std::vector<intersec_extremeedge_t<T>>& intersectionexedge_pairs){
+                for(int i=0; i<intersections_.size(); ++i){
+                    extreme_edge_t<T> edge0, edge1;
+                    polygon_firstptr_->GetExtremeEdge(intersections_[i].first.first_index, edge0);
+                    polygon_secondptr_->GetExtremeEdge(intersections_[i].first.second_index, edge1);
+                
+                    intersectionexedge_pairs.emplace_back(intersec_extremeedge_t<T>(edge0, edge1));
+                }
+            }
+            void ReconstructionIntersectionPolygon();
         private:
             // decide a main direction, to split polygon. just use ox(_|_)oy
             // split ordered:
@@ -273,10 +296,21 @@ namespace polygon{
             MonotoneChain<T> leftsecond_monochain_xbase_;
             MonotoneChain<T> rightsecond_monochain_xbase_;
 
+            int index_leftfirst_inleftfirstchain_xbase_;
+            int index_rightfirst_inrightfirstchain_xbase_;
+            int index_leftfirst_inleftsecondchain_xbase_;
+            int index_rightfirst_inrightsecondchain_xbase_;
+
             MonotoneChain<T> leftfirst_monochain_ybase_;
             MonotoneChain<T> rightfirst_monochain_ybase_;
             MonotoneChain<T> leftsecond_monochain_ybase_;
             MonotoneChain<T> rightsecond_monochain_ybase_;
+
+            int index_leftfirst_inleftfirstchain_ybase_;
+            int index_rightfirst_inrightfirstchain_ybase_;
+            int index_leftfirst_inleftsecondchain_ybase_;
+            int index_rightfirst_inrightsecondchain_ybase_;
+
 
             Polygon<T>* polygon_firstptr_ = nullptr;
             Polygon<T>* polygon_secondptr_ = nullptr;

@@ -12,12 +12,12 @@ void DrawPolygon(polygon::Polygon<T>& polygon, cv::Mat& img);
 
 int main(int argc, char* argv[]){
     // create two polygon that has interface.
-    for(int testcounter =0; testcounter < 100000; ++testcounter){
+    // for(int testcounter =0; testcounter < 100000; ++testcounter){
         PolygonPrintf("==========================================================\n");
         std::vector<polygon::point2d_t<double>> created_points;
         std::pair<double, double> range_min(0, 0);
         std::pair<double, double> range_max(50, 50);
-        polygon::CreateRandomPoints2d(4, range_min, range_max, created_points);
+        polygon::CreateRandomPoints2d(50, range_min, range_max, created_points);
         std::vector<polygon::point2d_t<double>> copyshift_points;
         double xmin = created_points[0].x;
         double xmax = created_points[0].x;
@@ -151,6 +151,8 @@ int main(int argc, char* argv[]){
         }
         std::vector<polygon::point2d_t<double> *> interpoints;
         polygonIntersecting.GetIntersections(interpoints);
+        std::vector<polygon::intersec_extremeedge_t<double>> interexedgepairs;
+        polygonIntersecting.GetIntersectionEdges(interexedgepairs);
         auto end_calintersec = std::chrono::steady_clock::now();
 
         // std::cout<<std::chrono::duration<double,std::micro>(end_createpolygon-start_createpolygon+ end_sort - start_sort + end_createexedge - start_createexedge + end_calintersec - start_calintersec).count()<<std::endl;
@@ -216,7 +218,7 @@ int main(int argc, char* argv[]){
         }
         
         // cv::destroyAllWindows();
-        
+        // 将相交的部分重建成polygon
         cv::imshow("xbase split", img_xbase);
         cv::waitKey(1);
         if(interpoints.size() != 2){
@@ -230,12 +232,17 @@ int main(int argc, char* argv[]){
             cv::waitKey(30);
         }
         // polygonIntersecting
-
+        for(int i=0; i<interexedgepairs.size(); ++i){
+            cv::line(img_xbase, cv::Point2d(50+10*interexedgepairs[i].first_edge.p_start->x, 550-10*interexedgepairs[i].first_edge.p_start->y), cv::Point2d(50+10*interexedgepairs[i].first_edge.p_end->x, 550-10*interexedgepairs[i].first_edge.p_end->y), 50, 1);
+            cv::line(img_xbase, cv::Point2d(50+10*interexedgepairs[i].second_edge.p_start->x, 550-10*interexedgepairs[i].second_edge.p_start->y), cv::Point2d(50+10*interexedgepairs[i].second_edge.p_end->x, 550-10*interexedgepairs[i].second_edge.p_end->y), 50, 1);
+        }
+        
         created_points.clear();
         copyshift_points.clear();
-
-        printf("test counter is %d.\n", testcounter);
-    }
+        cv::imshow("img_xbase", img_xbase);
+        cv::waitKey(0);
+        // printf("test counter is %d.\n", testcounter);
+    // }
     return 0;
 }
 

@@ -647,6 +647,7 @@ namespace polygon
         ++firstDiff_Index;
         if (firstDiff_Index == endthreshold)
         {
+            printf("run in firstDiff_index == endthreshold.\n");
             // minfirst 是第一次找到的是minx， 然后从min->max, 那么优先的是right monochain
             if(findminfirst){
                 index_rightfirst_inrightfirstchain_xbase_ = 0;
@@ -680,6 +681,7 @@ namespace polygon
                 rightfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[0]);
             }
         }
+
         // 定理： 一个循环有序队列中，最大值和最小值的index 不可能都在端点, 除非一条直线的情况加一个点的情况
         for (int i = 0; i < expoints_first.size(); ++i)
         {
@@ -814,7 +816,10 @@ namespace polygon
             }
             if (i == endthreshold - 1)
             {
-                // 最后一个结果还未break， 则说明第一个是miny， the last is maxy
+                // 最后一个结果还未break， 则说明第一个是minx， the last is maxx
+                index_leftfirst_inleftfirstchain_xbase_ = endthreshold -1;
+                index_rightfirst_inrightfirstchain_xbase_ = 0;
+
                 rightfirst_monochain_xbase_.points_chain.assign(expoints_first.begin(), expoints_first.end());
                 leftfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[endthreshold - 1]);
                 leftfirst_monochain_xbase_.points_chain.emplace_back(expoints_first[0]);
@@ -1003,6 +1008,8 @@ namespace polygon
             if (i == endthreshold - 1)
             {
                 // 最后一个结果还未break， 则说明第一个是miny， the last is maxy
+                index_leftfirst_inleftfirstchain_ybase_ = endthreshold-1;
+                index_rightfirst_inrightfirstchain_ybase_ = 0;
                 rightfirst_monochain_ybase_.points_chain.assign(expoints_first.begin(), expoints_first.end());
                 leftfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[endthreshold - 1]);
                 leftfirst_monochain_ybase_.points_chain.emplace_back(expoints_first[0]);
@@ -1031,7 +1038,7 @@ namespace polygon
         }
         /***=============           first start X major           =================**/
         point2d_t<T> *minx1_expoint = nullptr, *maxx1_expoint = nullptr, *miny1_expoint = nullptr, *maxy1_expoint = nullptr;
-        size_t minx1_index, maxx1_index, miny1_index, maxy1_index;
+        int minx1_index, maxx1_index, miny1_index, maxy1_index;
         start_idx = 0, end_idx = expoints_second.size() - 1, endthreshold = expoints_second.size(); // 永远在数值上都是差一步的距离 start_idx - 1 = end_idx
         // is unclockwise to visited these points
         findminfirst = false;
@@ -1064,6 +1071,7 @@ namespace polygon
         if (firstDiff_Index == endthreshold)
         {
             // minfirst 是第一次找到的是minx， 然后从min->max, 那么优先的是right monochain
+            printf("run in firstDiff_index == endthreshold.\n");
             if(findminfirst){
                 index_rightfirst_inrightsecondchain_xbase_ = 0;
                 index_leftfirst_inleftsecondchain_xbase_ = firstDiff_Index-2;
@@ -1099,8 +1107,10 @@ namespace polygon
         // 定理： 一个循环有序队列中，最大值和最小值的index 不可能都在端点, 除非一条直线的情况加一个点的情况
         for (int i = firstDiff_Index; i < endthreshold; ++i)
         { //must can be find minest or maxest x points, but should
+            printf("run in firstDiff for. %d.\n", firstDiff_Index);
             if (findminfirst)
             {
+                printf("run in findminfirst.\n");
                 if (expoints_second[i]->x > expoints_second[i - 1]->x)
                 {
                     // 当出现第一个小于的值时，找到最大值。接下来，将所当前最大值和之后所有递减的push into leftsecond_monochain
@@ -1150,9 +1160,11 @@ namespace polygon
             else
             {
                 // find max
+                printf("run in findmaxfirst.\n");
                 if (expoints_second[i]->x < expoints_second[i - 1]->x)
                 {
                     // 找到最小值，接下来，把所有当前最小值之后递增的pushinto rightsecond_monochain
+                    printf(" --- i is %d.\n", i);
                     maxx1_index = i - 1;
                     maxx1_expoint = expoints_second[maxx1_index];
 
@@ -1200,6 +1212,8 @@ namespace polygon
             if (i == endthreshold - 1)
             {
                 // 最后一个结果还未break， 则说明第一个是miny， the last is maxy
+                index_leftfirst_inleftsecondchain_xbase_ = endthreshold-1;
+                index_rightfirst_inrightsecondchain_xbase_ = 0;
                 rightsecond_monochain_xbase_.points_chain.assign(expoints_second.begin(), expoints_second.end());
                 leftsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[endthreshold - 1]);
                 leftsecond_monochain_xbase_.points_chain.emplace_back(expoints_second[0]);
@@ -1383,13 +1397,15 @@ namespace polygon
             }
             if (i == endthreshold - 1)
             {
-                // 最后一个结果还未break， 则说明第一个是miny， the last is maxy
+                index_leftfirst_inleftsecondchain_ybase_ = endthreshold-1;
+                index_rightfirst_inrightsecondchain_ybase_ = 0;
                 rightsecond_monochain_ybase_.points_chain.assign(expoints_second.begin(), expoints_second.end());
                 leftsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[endthreshold - 1]);
                 leftsecond_monochain_ybase_.points_chain.emplace_back(expoints_second[0]);
                 break;
             }
         }
+        printf("index %d %d %d %d.\n", index_leftfirst_inleftfirstchain_xbase_, index_leftfirst_inleftsecondchain_xbase_, index_rightfirst_inrightfirstchain_xbase_, index_rightfirst_inrightsecondchain_xbase_);
         PolygonPrintf("polygon xbase extreme points size is %d, leftchain size is %d, rightchain size is %d.\n", (int)polygon_firstptr_->SizeOfExtremePoints(), (int)leftfirst_monochain_xbase_.points_chain.size(), (int)rightfirst_monochain_xbase_.points_chain.size());
         PolygonPrintf("polygon ybase extreme points size is %d, leftchain size is %d, rightchain size is %d.\n", (int)polygon_firstptr_->SizeOfExtremePoints(), (int)leftfirst_monochain_ybase_.points_chain.size(), (int)rightfirst_monochain_ybase_.points_chain.size());
         PolygonPrintf("polygon xbase second extreme points size is %d, leftchain size is %d, rightchain size is %d.\n", (int)polygon_secondptr_->SizeOfExtremePoints(), (int)leftsecond_monochain_xbase_.points_chain.size(), (int)rightsecond_monochain_xbase_.points_chain.size());
@@ -1570,24 +1586,28 @@ namespace polygon
             {
                 /* code */
                 PolygonPrintf("run at %s.\n", tag.c_str());
+                printf("000, start index is %d %d.\n", index_leftfirst_inleftfirstchain_xbase_, index_leftfirst_inleftsecondchain_xbase_);
                 CalIntersectionBetweenTwoMonochainLine(leftfirst_monochain_xbase_, leftsecond_monochain_xbase_, index_leftfirst_inleftfirstchain_xbase_, index_leftfirst_inleftsecondchain_xbase_);
             }
             if (tag == "001")
             {
                 /* code */
                 PolygonPrintf("run at %s.\n", tag.c_str());
+                printf("001, start index is %d %d.\n", index_leftfirst_inleftfirstchain_xbase_, index_rightfirst_inrightsecondchain_xbase_);
                 CalIntersectionBetweenTwoMonochainLine(leftfirst_monochain_xbase_, rightsecond_monochain_xbase_, index_leftfirst_inleftfirstchain_xbase_, index_rightfirst_inrightsecondchain_xbase_);
             }
             if (tag == "010")
             {
                 /* code */
                 PolygonPrintf("run at %s.\n", tag.c_str());
+                printf("010, start index is %d %d.\n", index_rightfirst_inrightfirstchain_xbase_, index_leftfirst_inleftsecondchain_xbase_);
                 CalIntersectionBetweenTwoMonochainLine(rightfirst_monochain_xbase_, leftsecond_monochain_xbase_, index_rightfirst_inrightfirstchain_xbase_, index_leftfirst_inleftsecondchain_xbase_);
             }
             if (tag == "011")
             {
                 /* code */
                 PolygonPrintf("run at %s.\n", tag.c_str());
+                printf("011, start index is %d %d.\n", index_rightfirst_inrightfirstchain_xbase_, index_rightfirst_inrightsecondchain_xbase_);
                 CalIntersectionBetweenTwoMonochainLine(rightfirst_monochain_xbase_, rightsecond_monochain_xbase_, index_rightfirst_inrightfirstchain_xbase_, index_rightfirst_inrightsecondchain_xbase_);
             }
             if (tag == "100")
@@ -1677,7 +1697,7 @@ namespace polygon
                     if (IsLineIntersecting(midedge0, midedge1))
                     {
                         // has ， find the point and save into vector
-                        PolygonPrintf("line has intersection. edge is %d %d+++++++++++++++++++++++++++++++++++ \n", p0, p1);
+                        printf("line has intersection. edge is %d %d+++++++++++++++++++++++++++++++++++ \n", start0+p0, start1+p1);
                         point2d_t<T> *inter = new point2d_t<T>(0, 0);
                         bool issucc = CalRealIntersectionPosition(midedge0, midedge1, inter);
                         if (issucc)
@@ -1707,6 +1727,8 @@ namespace polygon
             int left0_start=-1, right0_start=-1, left1_start= -1, right1_start = -1;
             chain0.GetMidEdge(midedge0, leftchain0, rightchain0, left0_start, right0_start);
             chain1.GetMidEdge(midedge1, leftchain1, rightchain1, left1_start, right1_start);
+            printf("left right0 start is %d, %d rightchain size %d.\n", left0_start, right0_start, (int)rightchain0.points_chain.size());
+            printf("left right1 start is %d, %d rightchain size %d.\n", left1_start, right1_start, (int)rightchain1.points_chain.size());
             /**
              * @brief @todo
              * 下方还需要更新right0 和 right1 
@@ -1732,7 +1754,7 @@ namespace polygon
 
                 if (issucc)
                 {
-                    PolygonPrintf("line has intersection, edge is %d %d===============================.\n", (int)((chain0.points_chain.size() - 1) / 2), (int)((chain1.points_chain.size() - 1) / 2));
+                    printf("line has intersection, edge is %d %d===============================.\n", start0+(int)((chain0.points_chain.size() - 1) / 2), start1+(int)((chain1.points_chain.size() - 1) / 2));
                     extremeedge_index_t indexes; // 在这个位置的点和后面一个点之间的边会存在一个交点
                     indexes.first_index = start0 + (chain0.points_chain.size() - 1) / 2;
                     indexes.second_index = start1 + (chain1.points_chain.size() - 1) / 2;
@@ -1804,6 +1826,7 @@ namespace polygon
             if (PotentionIntersection(leftchain0, leftchain1))
             {
                 int tempsize = intersections_.size();
+                printf("00, new start left right index is %d %d.\n", start0+left0_start, start1+left1_start);
                 CalIntersectionBetweenTwoMonochainLine(leftchain0, leftchain1, start0+left0_start, start1+left1_start);
                 if (tempsize == intersections_.size())
                 {
@@ -1842,7 +1865,8 @@ namespace polygon
 
             if (PotentionIntersection(leftchain0, rightchain1))
             {
-                CalIntersectionBetweenTwoMonochainLine(leftchain0, rightchain1, left0_start, right1_start);
+                printf("01, new start left right index is %d %d.\n", start0+left0_start, start1+right1_start);
+                CalIntersectionBetweenTwoMonochainLine(leftchain0, rightchain1, start0+left0_start, start1+right1_start);
                 PolygonPrintf("accept this 01 result.\n");
             }
             else
@@ -1876,7 +1900,8 @@ namespace polygon
 
             if (PotentionIntersection(rightchain0, leftchain1))
             {
-                CalIntersectionBetweenTwoMonochainLine(rightchain0, leftchain1, right0_start, left1_start);
+                printf("10, new start left right index is %d %d.\n", start0+right0_start, start1+right1_start);
+                CalIntersectionBetweenTwoMonochainLine(rightchain0, leftchain1, start0+right0_start, start1+left1_start);
                 PolygonPrintf("accept this 10 result.\n");
             }
             else
@@ -1908,7 +1933,8 @@ namespace polygon
 #endif
             if (PotentionIntersection(rightchain0, rightchain1))
             {
-                CalIntersectionBetweenTwoMonochainLine(rightchain0, rightchain1, right0_start, right1_start);
+                printf("11, new start left right index is %d %d.\n", start0+right0_start, start1+right1_start);
+                CalIntersectionBetweenTwoMonochainLine(rightchain0, rightchain1, start0+right0_start, start1+right1_start);
                 PolygonPrintf("accept this 11 result.\n");
             }
             else

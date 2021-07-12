@@ -160,6 +160,11 @@ namespace polygon{
     }
 
     template<class T>
+    Polygon<T>::Polygon(std::vector<point2d_t<T>*>& setpoints){
+        points_.assign(setpoints.begin(), setpoints.end());
+    }
+
+    template<class T>
     void Polygon<T>::SorttoStarPolygon(){
         T max_x = std::numeric_limits<T>::min(), min_x = std::numeric_limits<T>::max(), min_y = std::numeric_limits<T>::max(), max_y = std::numeric_limits<T>::min();
         unsigned long long maxx_idx=0, minx_idx=0, miny_idx=0, maxy_idx=0;
@@ -305,6 +310,16 @@ namespace polygon{
     void Polygon<T>::GetTempPoints(std::vector<point2d_t<T>*>& resorted_points){
         resorted_points.assign(points_.begin(), points_.end());
     }
+
+    template <class T>
+    point2d_t<T>* Polygon<T>::GetTempPoint(int index){
+        if(index <0 || index >= this->SizeOfExtremePoints()){
+            printf("error, index is outof bound.\n");
+            exit(-1);
+        }
+        return extreme_points_[index];
+    }
+
     template<class T>
     void Polygon<T>::GetExtremePoints(std::vector<point2d_t<T>*>& expoints){
         expoints.assign(extreme_points_.begin(), extreme_points_.end());

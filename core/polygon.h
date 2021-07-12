@@ -78,6 +78,7 @@ class Polygon
 {
 public:
     Polygon(std::vector<point2d_t<T>> &setpoints);
+    Polygon(std::vector<point2d_t<T>*> &setpoints);
     void SorttoStarPolygon();
     void CreateExtremeEdges();
 
@@ -100,6 +101,7 @@ public:
     void GetExtremePoints(std::vector<point2d_t<T>*>& expoints);
     void GetExtremeEdges(std::vector<extreme_edge_t<T>> &exedges);
     void GetTempPoints(std::vector<point2d_t<T>*>& points);
+    point2d_t<T>* GetTempPoint(int index);
     size_t SizeOfExtremePoints(){return extreme_points_.size();}
 
     T GetExIndexX(int idx){return extreme_points_[idx]->x;}

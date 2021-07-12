@@ -1996,8 +1996,144 @@ namespace polygon
         }
     }
 
+
     template <class T>
     void PolygonIntersecting<T>::ReconstructionIntersectionPolygon(){
+        // we know the intersected edge in two polygon.
+        // construction begin in the first polygon edge.
+        // edge is points size in a polygon // make a circle, the last point link the first point
+        if(intersections_.empty()){
+            printf("error, two polygon cannot intersect.\n");
+            return;// get intersect_polygon is nullptr, means no intersections.
+        }
+        exedgeindex_node_t firstpolygon_intersectionwithsecond[polygon_firstptr_->SizeOfExtremePoints()];
+        exedgeindex_node_t secondpolygon_intersectionwithfirst[polygon_secondptr_->SizeOfExtremePoints()];
+        // 先遍历一边，把flag 打上
+        int first_startedge = intersections_[0].first.first_index;
+        for(int i=0; i<intersections_.size(); ++i){
+            if(firstpolygon_intersectionwithsecond[intersections_[i].first.first_index].index == -1){
+                firstpolygon_intersectionwithsecond[intersections_[i].first.first_index].index = intersections_[i].first.second_index;
+                firstpolygon_intersectionwithsecond[intersections_[i].first.first_index].intersect_index = i;
+            }
+            else{
+                exedgeindex_node_t* last = firstpolygon_intersectionwithsecond[intersections_[i].first.first_index].next;
+                while(last->next != nullptr){
+                    last = last->next;
+                }
+                last = new exedgeindex_node_t(intersections_[i].first.second_index);
+                last->intersect_index = i;
+            }
 
+            if(secondpolygon_intersectionwithfirst[intersections_[i].first.second_index].index == -1){
+                secondpolygon_intersectionwithfirst[intersections_[i].first.second_index].index = intersections_[i].first.first_index;
+                secondpolygon_intersectionwithfirst[intersections_[i].first.second_index].intersect_index = i;
+            }
+            else{
+                exedgeindex_node_t* last = secondpolygon_intersectionwithfirst[intersections_[i].first.second_index].next;
+                while(last->next != nullptr){
+                    last = last->next;
+                }
+                last = new exedgeindex_node_t(intersections_[i].first.first_index);
+                last->intersect_index = i;
+            }
+        }
+
+        Sorted_polygonandIntersection(firstpolygon_intersectionwithsecond, polygon_firstptr_->SizeOfExtremePoints());
+        Sorted_polygonandIntersection(secondpolygon_intersectionwithfirst, polygon_secondptr_->SizeOfExtremePoints());
+
+        // create a new polygon. // first find all points in 
+        std::vector<point2d_t<T>*> intersectref_points; 
+        int curindex = first_startedge; // 当下一次curindex 
+        int first_endthreshold = polygon_firstptr_->SizeOfExtremePoints();
+        int second_endthreshold = polygon_secondptr_->SizeOfExtremePoints();
+        bool isfirst = true;
+        bool infirstpolygon = true;
+        while(true){
+            if(infirstpolygon){
+                if (curindex == first_endthreshold)
+                {
+                    curindex = 0;
+                }
+                if (firstpolygon_intersectionwithsecond[curindex].index != -1)
+                { // 有交点
+                    if(isfirst){
+                        isfirst = false;
+                        // 保持polygon1 的顺序
+                    }
+                    else{
+                        // push point in, 这里的points 是否按照顺序来排序的，肯定是会有影响的。
+                        // when use a element, should delete one.
+
+
+                        // 完成后转换polygon2 的顺序, curindex should change 
+                    }
+                }
+            }
+            else{
+                // in second polygon
+                if (curindex == second_endthreshold)
+                {
+                    curindex = 0;
+                }
+                if (secondpolygon_intersectionwithfirst[curindex].index != -1) // 有交点
+                { // 有交点
+                    // 完成转换 成polygon1, curindex should change
+
+                }
+            }
+        }
+        if(!polygon_intersectptr_){
+            delete polygon_intersectptr_;
+            polygon_intersectptr_ = nullptr;
+        }
+        polygon_intersectptr_ = new Polygon<T>(intersectref_points);
     }
+    
+    // 排序单个边与其他边相交的情况， 更优秀的做法是相交算完了，然后直接加入到polygon中
+    bool compare_dis(const std::pair<exedgeindex_node_t*, double> elem0, const std::pair<exedgeindex_node_t*, double> elem1){
+        return elem0.second < elem1.second;
+    }
+
+    template <class T>
+    void PolygonIntersecting<T>::SortedFirst_polygonandIntersection(exedgeindex_node_t vec[], const int& size){
+        for(int i=0; i<size; ++i){
+            if(vec[i].next != nullptr){
+                Sorted_polygonandIntersection(polygon_firstptr_->GetExtremePoint(i), vec[i]);
+            }
+            continue;
+        }
+    }
+    template <class T>
+    void PolygonIntersecting<T>::SortedSecond_polygonandIntersection(exedgeindex_node_t vec[], const int& size){
+        for(int i=0; i<size; ++i){
+            if(vec[i].next != nullptr){
+                Sorted_polygonandIntersection(polygon_secondptr_->GetExtremePoint(i), vec[i]);
+            }
+            continue;
+        }
+    }
+
+    template <class T>
+    void PolygonIntersecting<T>::Sorted_polygonandIntersection(point2d_t<T>* p0, exedgeindex_node_t& root){
+        // list order， how to sort the list, compare the dis with the start of the exedge
+        std::vector<std::pair<exedgeindex_node_t*, double>> exedgeindex_vec;
+        exedgeindex_node_t* rptr = &root;
+        
+        while(rptr != nullptr){
+            double dis = std::pow(intersections_[rptr->intersect_index].second->x - p0->x, 2)+std::pow(intersections_[rptr->intersect_index].second->y - p0->y, 2);
+            exedgeindex_vec.emplace_back(std::make_pair(rptr, dis));
+            rptr = rptr->next;
+        }
+        std::sort(exedgeindex_vec.begin(), exedgeindex_vec.end(), compare_dis);
+
+        rptr = &root;
+        for(int i=0; exedgeindex_vec.size()-1; ++i){
+            rptr->index = exedgeindex_vec[i].first->index;
+            rptr->intersect_index = exedgeindex_vec[i].first->intersect_index;
+            rptr->next = exedgeindex_vec[i+1].first;
+            rptr = rptr->next;
+        }
+    }
+
+    
 }

@@ -2231,7 +2231,7 @@ namespace polygon
                     curnode = curnode->next;
 
                 if(reinterpolygon_points.size() >= 2){
-                    if (curnode->point->id == reinterpolygon_points[1]->id)
+                    if (curnode->point->id == reinterpolygon_points[0]->id)
                     {
                         printf("find the same point break.\n");
                         break;

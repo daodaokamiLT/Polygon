@@ -12,7 +12,7 @@ void DrawPolygon(polygon::Polygon<T>& polygon, cv::Mat& img);
 
 int main(int argc, char* argv[]){
     // create two polygon that has interface.
-    // for(int testcounter =0; testcounter < 100000; ++testcounter){
+    for(int testcounter =0; testcounter < 100000; ++testcounter){
         PolygonPrintf("==========================================================\n");
         std::vector<polygon::point2d_t<double>> created_points;
         std::pair<double, double> range_min(0, 0);
@@ -240,9 +240,10 @@ int main(int argc, char* argv[]){
         created_points.clear();
         copyshift_points.clear();
         cv::imshow("img_xbase", img_xbase);
-        cv::waitKey(0);
-        // printf("test counter is %d.\n", testcounter);
-    // }
+        cv::waitKey(30);
+        // cv::waitKey(0);
+        printf("test counter is %d.\n", testcounter);
+    }
     return 0;
 }
 

@@ -17,7 +17,7 @@ int main(int argc, char* argv[]){
         std::vector<polygon::point2d_t<double>> created_points;
         std::pair<double, double> range_min(0, 0);
         std::pair<double, double> range_max(50, 50);
-        polygon::CreateRandomPoints2d(50, range_min, range_max, created_points);
+        polygon::CreateRandomPoints2d(20, range_min, range_max, created_points);
         std::vector<polygon::point2d_t<double>> copyshift_points;
         double xmin = created_points[0].x;
         double xmax = created_points[0].x;
@@ -179,6 +179,9 @@ int main(int argc, char* argv[]){
         {
             cv::line(img_xbase, cv::Point2d(50 + 10 * secondrightchain_xbase[i]->x, 550 - 10 * secondrightchain_xbase[i]->y), cv::Point2d(50 + 10 * secondrightchain_xbase[i + 1]->x, 550 - 10 * secondrightchain_xbase[i + 1]->y), 100, 2);
         }
+
+        cv::circle(img_xbase, cv::Point2d(50+10*p0->x, 550-10*p0->y), 6, 255, 1);
+        cv::circle(img_xbase, cv::Point2d(50+10*p1->x, 550-10*p1->y), 6, 255, 1);
         cv::imshow("xbase split", img_xbase);
         #if debug
         cv::Mat img_ybase = img.clone();
@@ -233,15 +236,21 @@ int main(int argc, char* argv[]){
         }
         // polygonIntersecting
         for(int i=0; i<interexedgepairs.size(); ++i){
-            cv::line(img_xbase, cv::Point2d(50+10*interexedgepairs[i].first_edge.p_start->x, 550-10*interexedgepairs[i].first_edge.p_start->y), cv::Point2d(50+10*interexedgepairs[i].first_edge.p_end->x, 550-10*interexedgepairs[i].first_edge.p_end->y), 50, 1);
-            cv::line(img_xbase, cv::Point2d(50+10*interexedgepairs[i].second_edge.p_start->x, 550-10*interexedgepairs[i].second_edge.p_start->y), cv::Point2d(50+10*interexedgepairs[i].second_edge.p_end->x, 550-10*interexedgepairs[i].second_edge.p_end->y), 50, 1);
+            printf("%d edge is %lf %lf -- %lf %lf.\n", i, interexedgepairs[i].first_edge.p_start->x, interexedgepairs[i].first_edge.p_start->y, interexedgepairs[i].first_edge.p_end->x, interexedgepairs[i].first_edge.p_end->y);
+            printf("%d edge is %lf %lf -- %lf %lf.\n", i, interexedgepairs[i].second_edge.p_start->x, interexedgepairs[i].second_edge.p_start->y, interexedgepairs[i].second_edge.p_end->x, interexedgepairs[i].second_edge.p_end->y);
+            
+            cv::line(img_xbase, cv::Point2d(50+10*interexedgepairs[i].first_edge.p_start->x, 550-10*interexedgepairs[i].first_edge.p_start->y), cv::Point2d(50+10*interexedgepairs[i].first_edge.p_end->x, 550-10*interexedgepairs[i].first_edge.p_end->y), 50, 5, 3);
+            
+            cv::line(img_xbase, cv::Point2d(50+10*interexedgepairs[i].second_edge.p_start->x, 550-10*interexedgepairs[i].second_edge.p_start->y), cv::Point2d(50+10*interexedgepairs[i].second_edge.p_end->x, 550-10*interexedgepairs[i].second_edge.p_end->y), 50, 5, 3);
         }
-        
+
         created_points.clear();
         copyshift_points.clear();
         cv::imshow("img_xbase", img_xbase);
         cv::waitKey(30);
-        // cv::waitKey(0);
+
+        polygonIntersecting.ReconstructionIntersectionPolygon();
+
         printf("test counter is %d.\n", testcounter);
     }
     return 0;

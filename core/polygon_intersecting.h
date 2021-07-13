@@ -219,10 +219,13 @@ namespace polygon{
     }
     // just between two convex polygon.
     
+    template <class T>
     struct exedgeindex_node_t{
         int index = -1;
-        int intersect_index = -1;
+        bool isinter = false;
         exedgeindex_node_t* next = nullptr;
+        point2d_t<T>* point = nullptr;
+        int matched_index = -1;
         exedgeindex_node_t() = default;
         exedgeindex_node_t(int idx):index(idx){}
     };
@@ -351,9 +354,9 @@ namespace polygon{
             std::vector<std::pair<extremeedge_index_t, point2d_t<T>*>> intersections_; // 存储的是在monochain中的位置和 对应的点位置
             
             void CalIntersectionBetweenTwoMonochainLine(MonotoneChain<T>& chain0, MonotoneChain<T>& chain1, int start0, int start1); 
-            void SortedFirst_polygonandIntersection(exedgeindex_node_t vec[], const int& size);
-            void SortedSecond_polygonandIntersection(exedgeindex_node_t vec[], const int& size);
-            void Sorted_polygonandIntersection(point2d_t<T>* p0, exedgeindex_node_t& root);
+            void SortedFirst_polygonandIntersection(exedgeindex_node_t<T> vec[], const int& size);
+            void SortedSecond_polygonandIntersection(exedgeindex_node_t<T> vec[], const int& size);
+            void Sorted_polygonandIntersection(point2d_t<T>* p0, exedgeindex_node_t<T>& root);
     };
 }
 

@@ -248,6 +248,10 @@ int main(int argc, char* argv[]){
         copyshift_points.clear();
         cv::imshow("img_xbase", img_xbase);
         cv::waitKey(30);
+
+
+        polygonIntersecting.ReconstructionIntersectionPolygon();
+
         printf("test counter is %d.\n", testcounter);
     }
     return 0;

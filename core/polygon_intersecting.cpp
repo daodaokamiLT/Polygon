@@ -2023,6 +2023,15 @@ namespace polygon
         }
     }
 
+/***
+ * 
+ * 
+ * @todo first: repair two intersection in same edge
+ * 
+ * 
+ * 
+*/
+
     template <class T>
     void PolygonIntersecting<T>::ReconstructionIntersectionPolygon(){
         // we know the intersected edge in two polygon.
@@ -2067,7 +2076,7 @@ namespace polygon
         ptr->next = &vec_secondpoints[0];
         ptr->point = polygon_secondptr_->GetExtremePoint(polygon_secondptr_->SizeOfExtremePoints()-1);
 
-    #if !debug 
+    #if debug 
         cv::Mat img00(cv::Size(1200, 600), CV_8UC1, cv::Scalar(0));
         for(int i=0; i<polygon_firstptr_->SizeOfExtremePoints()-1; ++i){
             cv::line(img00, cv::Point2d(50+10*vec_firstpoints[i].point->x, 550-10*vec_firstpoints[i].point->y), cv::Point2d(50+10*vec_firstpoints[i+1].point->x, 550-10*vec_firstpoints[i+1].point->y), 255, 2);
@@ -2195,37 +2204,37 @@ namespace polygon
             }
         }
         
-#if debug
+#if !debug
         // draw the link of the add intersecs polygon., 目前这个push方式有问题
         cv::Mat img0(cv::Size(1200, 600), CV_8UC1, cv::Scalar(0));
         exedgeindex_node_t<T>* root = &vec_firstpoints[0];
         cv::line(img0, cv::Point2d(50+10*root->point->x, 550-10*root->point->y), cv::Point2d(50+10*root->next->point->x, 550-10*root->next->point->y), 255, 2);
         cv::imshow("img0", img0);
-        cv::waitKey(0);
+        // cv::waitKey(0);
         root = root->next;
         while(root != &vec_firstpoints[0]){
             cv::line(img0, cv::Point2d(50+10*root->point->x, 550-10*root->point->y), cv::Point2d(50+10*root->next->point->x, 550-10*root->next->point->y), 255, 2);
             root = root->next;
             cv::imshow("img0", img0);
-            cv::waitKey(0);
+            // cv::waitKey(0);
         }
         cv::imshow("img0", img0);
-        cv::waitKey(0);
+        // cv::waitKey(0);
 
-        cv::Mat img1(cv::Size(1200, 600), CV_8UC1, cv::Scalar(0));
+        // cv::Mat img1(cv::Size(1200, 600), CV_8UC1, cv::Scalar(0));
         exedgeindex_node_t<T>* root1 = &vec_secondpoints[0];
-        cv::line(img1, cv::Point2d(50+10*root1->point->x, 550-10*root1->point->y), cv::Point2d(50+10*root1->next->point->x, 550-10*root1->next->point->y), 255, 2);
+        cv::line(img0, cv::Point2d(50+10*root1->point->x, 550-10*root1->point->y), cv::Point2d(50+10*root1->next->point->x, 550-10*root1->next->point->y), 255, 2);
         root1 = root1->next;
-        cv::imshow("img1", img1);
-        cv::waitKey(0);
+        cv::imshow("img0", img0);
+        // cv::waitKey(0);
         while(root1 != &vec_secondpoints[0]){
-            cv::line(img1, cv::Point2d(50+10*root1->point->x, 550-10*root1->point->y), cv::Point2d(50+10*root1->next->point->x, 550-10*root1->next->point->y), 255, 2);
+            cv::line(img0, cv::Point2d(50+10*root1->point->x, 550-10*root1->point->y), cv::Point2d(50+10*root1->next->point->x, 550-10*root1->next->point->y), 255, 2);
             root1 = root1->next;
-            cv::imshow("img1", img1);
-            cv::waitKey(0);
+            cv::imshow("img0", img0);
+            // cv::waitKey(0);
         }
-        cv::imshow("img1", img1);
-        cv::waitKey(0);
+        cv::imshow("img0", img0);
+        // cv::waitKey(0);
 #endif
         bool infirstchain = true;
         std::vector<point2d_t<T>*> reinterpolygon_points;
@@ -2233,6 +2242,9 @@ namespace polygon
         {
             printf("intersections_[0].first.first_index is %d. first polygon size is %d.\n", intersections_[0].first.first_index, (int)polygon_firstptr_->SizeOfExtremePoints());
             printf("error, the first intersection line next shouldn't be nullptr.\n");
+            if(!vec_firstpoints[intersections_[0].first.first_index].next->isinter){
+                printf("just not the inter.\n");
+            }
             exit(-1);
         }
 
@@ -2256,8 +2268,9 @@ namespace polygon
         }
         node_ptr = node_ptr->next;
         // 不论是在first chain 还是 second chain 都转移到下一个位置
-        // 需要一个功能，查找某一点，在链表中的位置，input: index, points(use equal.)
-        while(node_ptr != root_ptr){
+        // 需要一个功能，查找某一点，在链表中的位置，input: index, points(use equal.
+        while(node_ptr != root_ptr && !node_ptr->point->Equal(root_ptr->point)){
+            printf("(%lf %lf) != (%lf %lf)\n", node_ptr->point->x, node_ptr->point->y, root_ptr->point->x, root_ptr->point->y);
             reinterpolygon_points.emplace_back(node_ptr->point);
             printf("emplace pid %lf, %lf.===========================\n", node_ptr->point->x, node_ptr->point->y);
 
@@ -2288,11 +2301,11 @@ namespace polygon
             for(int i=0; i<reinterpolygon_points.size()-1; ++i){
                 cv::line(img, cv::Point2d(50+10*reinterpolygon_points[i]->x, 550-10*reinterpolygon_points[i]->y), cv::Point2d(50+10*reinterpolygon_points[i+1]->x, 550-10*reinterpolygon_points[i+1]->y), cv::Scalar(255), 1);
                 cv::imshow("img repolygon", img);
-                cv::waitKey(0);
+                cv::waitKey(1);
             }
             cv::line(img, cv::Point2d(50+10*reinterpolygon_points[reinterpolygon_points.size()-1]->x, 550-10*reinterpolygon_points[reinterpolygon_points.size()-1]->y), cv::Point2d(50+10*reinterpolygon_points[0]->x, 550-10*reinterpolygon_points[0]->y), cv::Scalar(255), 1);
             cv::imshow("img repolygon", img);
-            cv::waitKey(0);
+            cv::waitKey(1);
 
 #endif
     }

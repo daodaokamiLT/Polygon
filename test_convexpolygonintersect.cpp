@@ -17,7 +17,7 @@ int main(int argc, char* argv[]){
         std::vector<polygon::point2d_t<double>> created_points;
         std::pair<double, double> range_min(0, 0);
         std::pair<double, double> range_max(50, 50);
-        polygon::CreateRandomPoints2d(20, range_min, range_max, created_points);
+        polygon::CreateRandomPoints2d(4, range_min, range_max, created_points);
         std::vector<polygon::point2d_t<double>> copyshift_points;
         double xmin = created_points[0].x;
         double xmax = created_points[0].x;

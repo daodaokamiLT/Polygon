@@ -98,9 +98,6 @@ public:
     const point2d_t<T>* GetMinY_x();
     const point2d_t<T>* GetMaxY_x();
 
-    point2d_t<T>* GetExtremePoint(int idx){
-        return points_[idx];
-    }
     void GetExtremePoints(std::vector<point2d_t<T>*>& expoints);
     void GetExtremeEdges(std::vector<extreme_edge_t<T>> &exedges);
     void GetTempPoints(std::vector<point2d_t<T>*>& points);
@@ -117,11 +114,21 @@ public:
         }
         exedge = extreme_edges_[index];
     }
+
+    point2d_t<T>* GetExtremePoint(int idx){
+        if(idx < 0 || idx >= extreme_points_.size()){
+            printf("get extreme edge error.\n");
+            exit(-1);
+        }
+        return extreme_points_[idx];
+    }
+
+    bool InPolygon(point2d_t<T>* p);
 private:
     std::vector<point2d_t<T>*> points_;
     std::vector<point2d_t<T>*> extreme_points_;
     std::vector<extreme_edge_t<T>> extreme_edges_;
-
+    
     // just for test
     point2d_t<T>* pminx_ = nullptr;
     point2d_t<T>* pmaxx_ = nullptr;

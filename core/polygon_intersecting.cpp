@@ -1997,16 +1997,44 @@ namespace polygon
     }
 
     template <class T>
+    exedgeindex_node_t<T>* FindNodeInVec(exedgeindex_node_t<T> container[], int containersize, int exedgeidx, point2d_t<T>* p){
+        printf("findnode in vec idx is %d.\n", exedgeidx);
+        if(exedgeidx < 0 || exedgeidx >= containersize){
+            printf("error, exedgeidx is outof bounder.\n");
+            exit(-1);
+        }
+        if(!container[exedgeidx].index == exedgeidx){
+            printf("cur containter may not match your exedgeidx.\n");
+            exit(-1);
+            return nullptr;
+        }
+        exedgeindex_node_t<T>* ptr = &container[exedgeidx];
+        printf("ptr index and exedgeidx is %d %d.\n", ptr->index, exedgeidx);
+        while(ptr->index == exedgeidx){
+            printf("cur ptr and next point is %lf %lf , %lf %lf.\n", ptr->point->x, ptr->point->y, ptr->next->point->x, ptr->next->point->y);
+            if(ptr->point->Equal(p)){
+                return ptr;
+            }
+            if(!ptr->next){
+                printf("error, ptr->next is nullptr.\n");
+                exit(-1);
+            }
+            ptr = ptr->next;
+        }
+    }
+
+    template <class T>
     void PolygonIntersecting<T>::ReconstructionIntersectionPolygon(){
         // we know the intersected edge in two polygon.
         // construction begin in the first polygon edge.
         // edge is points size in a polygon // make a circle, the last point link the first point
-        if(intersections_.empty()){
+        
+        if(intersections_.empty() || intersections_.size() == 1){
             printf("error, two polygon cannot intersect.\n");
             return;// get intersect_polygon is nullptr, means no intersections.
         }
-        int firstpoints_size = polygon_firstptr_->SizeOfExtremePoints()+intersections_.size();
-        int secondpoints_size = polygon_secondptr_->SizeOfExtremePoints()+intersections_.size();
+        int firstpoints_size = polygon_firstptr_->SizeOfExtremePoints();
+        int secondpoints_size = polygon_secondptr_->SizeOfExtremePoints();
         
         exedgeindex_node_t<T> vec_firstpoints[polygon_firstptr_->SizeOfExtremePoints()];
         exedgeindex_node_t<T> vec_secondpoints[polygon_secondptr_->SizeOfExtremePoints()];
@@ -2025,7 +2053,7 @@ namespace polygon
         ptr->isinter = false;
         ptr->next = &vec_firstpoints[0];
         ptr->point = polygon_firstptr_->GetExtremePoint(polygon_firstptr_->SizeOfExtremePoints()-1);
-
+        
         ptr = &vec_secondpoints[0];
         for(int i=0; i<polygon_secondptr_->SizeOfExtremePoints()-1; ++i){
             ptr->index = i;
@@ -2039,9 +2067,35 @@ namespace polygon
         ptr->next = &vec_secondpoints[0];
         ptr->point = polygon_secondptr_->GetExtremePoint(polygon_secondptr_->SizeOfExtremePoints()-1);
 
+    #if !debug 
+        cv::Mat img00(cv::Size(1200, 600), CV_8UC1, cv::Scalar(0));
+        for(int i=0; i<polygon_firstptr_->SizeOfExtremePoints()-1; ++i){
+            cv::line(img00, cv::Point2d(50+10*vec_firstpoints[i].point->x, 550-10*vec_firstpoints[i].point->y), cv::Point2d(50+10*vec_firstpoints[i+1].point->x, 550-10*vec_firstpoints[i+1].point->y), 255, 2);
+            cv::imshow("img00", img00);
+            // cv::waitKey(0);
+        }
+        cv::line(img00, cv::Point2d(50+10*vec_firstpoints[polygon_firstptr_->SizeOfExtremePoints()-1].point->x, 550-10*vec_firstpoints[polygon_firstptr_->SizeOfExtremePoints()-1].point->y), 
+                        cv::Point2d(50+10*vec_firstpoints[0].point->x, 550-10*vec_firstpoints[0].point->y), 255, 2);
+        cv::imshow("img00", img00);                        
+        // cv::waitKey(0);
+        
+
+        // cv::Mat img11(cv::Size(1200, 600), CV_8UC1, cv::Scalar(0));
+        for(int i=0; i<polygon_secondptr_->SizeOfExtremePoints()-1; ++i){
+            cv::line(img00, cv::Point2d(50+10*vec_secondpoints[i].point->x, 550-10*vec_secondpoints[i].point->y), cv::Point2d(50+10*vec_secondpoints[i+1].point->x, 550-10*vec_secondpoints[i+1].point->y), 255, 2);
+            cv::imshow("img00", img00);
+            // cv::waitKey(0);
+        }
+        cv::line(img00, cv::Point2d(50+10*vec_secondpoints[polygon_secondptr_->SizeOfExtremePoints()-1].point->x, 550-10*vec_secondpoints[polygon_secondptr_->SizeOfExtremePoints()-1].point->y), 
+                        cv::Point2d(50+10*vec_secondpoints[0].point->x, 550-10*vec_secondpoints[0].point->y), 255, 2);
+        cv::imshow("img00", img00);                        
+        cv::waitKey(0);
+        
+    #endif
+
         // insert intersections
-        exedgeindex_node_t<T> vec_firstintersect_points[polygon_firstptr_->SizeOfExtremePoints()];
-        exedgeindex_node_t<T> vec_secondintersect_points[polygon_secondptr_->SizeOfExtremePoints()];
+        exedgeindex_node_t<T> vec_firstintersect_points[intersections_.size()];
+        exedgeindex_node_t<T> vec_secondintersect_points[intersections_.size()];
 
         for(int i=0; i<intersections_.size(); ++i){
             vec_firstintersect_points[i].index = intersections_[i].first.first_index;
@@ -2054,7 +2108,9 @@ namespace polygon
                     if(vec_firstpoints[intersections_[i].first.first_index].next->next->isinter && vec_firstpoints[intersections_[i].first.first_index].next->next->next != nullptr){
                         if(vec_firstpoints[intersections_[i].first.first_index].next->next->next->isinter){
                             printf("error, one edge intersected more than 2 points.\n");
+                            #if debug
                             cv::waitKey(0);
+                            #endif
                             exit(-1);
                         }
                     }
@@ -2082,6 +2138,8 @@ namespace polygon
                 }
             }
             else{
+                printf("0error, never caused this type.\n");
+                exit(-1);
                 auto temp = vec_firstpoints[intersections_[i].first.first_index].next;
                 vec_firstpoints[intersections_[i].first.first_index].next = &vec_firstintersect_points[i];
                 vec_firstintersect_points[i].next = temp;
@@ -2091,13 +2149,16 @@ namespace polygon
             vec_secondintersect_points[i].point = intersections_[i].second;
             vec_secondintersect_points[i].isinter = true;
             vec_secondintersect_points[i].matched_index = intersections_[i].first.first_index;
+
             // add into point extremeedge
             if(vec_secondpoints[intersections_[i].first.second_index].next!= nullptr){
                 if(vec_secondpoints[intersections_[i].first.second_index].next->isinter && vec_firstpoints[intersections_[i].first.second_index].next->next != nullptr){
                     if(vec_secondpoints[intersections_[i].first.second_index].next->next->isinter && vec_firstpoints[intersections_[i].first.second_index].next->next->next != nullptr){
                         if(vec_secondpoints[intersections_[i].first.second_index].next->next->next->isinter){
                             printf("error, one edge intersected more than 2 points.\n");
+                            #if debug
                             cv::waitKey(0);
+                            #endif
                             exit(-1);
                         }
                     }
@@ -2126,89 +2187,113 @@ namespace polygon
                 
             }
             else{
+                printf("1error, never caused this type.\n");
+                exit(-1);
                 auto temp = vec_secondpoints[intersections_[i].first.second_index].next;
                 vec_secondpoints[intersections_[i].first.second_index].next = &vec_secondintersect_points[i];
                 vec_secondintersect_points[i].next = temp;
-            }   
-
+            }
         }
         
 #if debug
-        // draw the link of the add intersecs polygon.
+        // draw the link of the add intersecs polygon., 目前这个push方式有问题
+        cv::Mat img0(cv::Size(1200, 600), CV_8UC1, cv::Scalar(0));
+        exedgeindex_node_t<T>* root = &vec_firstpoints[0];
+        cv::line(img0, cv::Point2d(50+10*root->point->x, 550-10*root->point->y), cv::Point2d(50+10*root->next->point->x, 550-10*root->next->point->y), 255, 2);
+        cv::imshow("img0", img0);
+        cv::waitKey(0);
+        root = root->next;
+        while(root != &vec_firstpoints[0]){
+            cv::line(img0, cv::Point2d(50+10*root->point->x, 550-10*root->point->y), cv::Point2d(50+10*root->next->point->x, 550-10*root->next->point->y), 255, 2);
+            root = root->next;
+            cv::imshow("img0", img0);
+            cv::waitKey(0);
+        }
+        cv::imshow("img0", img0);
+        cv::waitKey(0);
+
+        cv::Mat img1(cv::Size(1200, 600), CV_8UC1, cv::Scalar(0));
+        exedgeindex_node_t<T>* root1 = &vec_secondpoints[0];
+        cv::line(img1, cv::Point2d(50+10*root1->point->x, 550-10*root1->point->y), cv::Point2d(50+10*root1->next->point->x, 550-10*root1->next->point->y), 255, 2);
+        root1 = root1->next;
+        cv::imshow("img1", img1);
+        cv::waitKey(0);
+        while(root1 != &vec_secondpoints[0]){
+            cv::line(img1, cv::Point2d(50+10*root1->point->x, 550-10*root1->point->y), cv::Point2d(50+10*root1->next->point->x, 550-10*root1->next->point->y), 255, 2);
+            root1 = root1->next;
+            cv::imshow("img1", img1);
+            cv::waitKey(0);
+        }
+        cv::imshow("img1", img1);
+        cv::waitKey(0);
 #endif
-        int counter_first = intersections_[0].first.first_index;
-        int counter_first_intersected = 0; // 表示当前在端点，没有进入边缘。
-        int counter_second = 0;
-        int counter_second_intersected = 0;
         bool infirstchain = true;
         std::vector<point2d_t<T>*> reinterpolygon_points;
-        if (vec_firstpoints[counter_first].next == nullptr)
+        if (vec_firstpoints[intersections_[0].first.first_index].next == nullptr || !vec_firstpoints[intersections_[0].first.first_index].next->isinter)
         {
+            printf("intersections_[0].first.first_index is %d. first polygon size is %d.\n", intersections_[0].first.first_index, (int)polygon_firstptr_->SizeOfExtremePoints());
             printf("error, the first intersection line next shouldn't be nullptr.\n");
             exit(-1);
         }
-        reinterpolygon_points.emplace_back(vec_firstpoints[counter_first].next->point);
-        counter_first_intersected = 2; // 当前在1 的位置
-        if(!vec_firstpoints[counter_first].next->next){// just one intersection
-            ++counter_first;
-            counter_first_intersected = 0;
+
+        exedgeindex_node_t<T>* node_ptr = vec_firstpoints[intersections_[0].first.first_index].next;
+        exedgeindex_node_t<T>* root_ptr = node_ptr;
+        reinterpolygon_points.emplace_back(node_ptr->point);
+        printf("cur node index is %d. matched is %d.\n", node_ptr->index, node_ptr->matched_index);
+        printf("emplace pid %lf, %lf.===========================\n", node_ptr->point->x, node_ptr->point->y);
+
+        if(polygon_secondptr_->InPolygon(vec_firstpoints[intersections_[0].first.first_index].point)){
+            printf("first node is in secondpolygon.\n");
+            infirstchain = false;
         }
-        while (true)
-        {
-            printf("run in here.\n");
-            if(infirstchain){
-                exedgeindex_node_t<T>* curnode = &vec_firstpoints[counter_first];
-                for(int i=0; i< counter_first_intersected; ++i)
-                    curnode = curnode->next;
-                if(reinterpolygon_points.size() >= 2){
-                    if (curnode->point->id == reinterpolygon_points[1]->id)
-                    {
-                        printf("find the same point break.\n");
-                        break;
-                    }
-                }
-                reinterpolygon_points.emplace_back(curnode->point);
-                
-                if(curnode->isinter){
-                    counter_second_intersected = 2;// 直接跳到下一个交点上或者顶点上
-                    counter_second = curnode->matched_index;
-                }
-                else{
-                    ++counter_first;
-                    if(counter_first == polygon_firstptr_->SizeOfExtremePoints()){
-                        counter_first = 0;
-                    }
+        if(!infirstchain){// 端点的前端，在polygon 外面，则下一次仍然可以加进去
+            node_ptr = FindNodeInVec(vec_secondpoints, secondpoints_size, node_ptr->matched_index, node_ptr->point);
+            printf("find intersect in second polygon edge id %d.\n", node_ptr->index);
+        }
+        if(!node_ptr->next){
+            printf("error, node_ptr is null.\n");
+            exit(-1);
+        }
+        node_ptr = node_ptr->next;
+        // 不论是在first chain 还是 second chain 都转移到下一个位置
+        // 需要一个功能，查找某一点，在链表中的位置，input: index, points(use equal.)
+        while(node_ptr != root_ptr){
+            reinterpolygon_points.emplace_back(node_ptr->point);
+            printf("emplace pid %lf, %lf.===========================\n", node_ptr->point->x, node_ptr->point->y);
+
+            if (infirstchain)
+            {
+                if(node_ptr->isinter){
+                    node_ptr = FindNodeInVec(vec_secondpoints, secondpoints_size, node_ptr->matched_index, node_ptr->point);
+                    infirstchain = false;
                 }
             }
-            else{
-                exedgeindex_node_t<T>* curnode = &vec_secondpoints[counter_second];
-                for(int i=0; i<counter_second_intersected; ++i){
-                    curnode = curnode->next;
-                }
-                reinterpolygon_points.emplace_back(curnode->point);
-                if(curnode->isinter)
-                {
-                    counter_first_intersected = 2;
-                    counter_first = curnode->matched_index;
-                }
-                else
-                {
-                    ++counter_second;
-                    if(counter_second == polygon_secondptr_->SizeOfExtremePoints()){
-                        counter_second = 0;
-                    }
+            else
+            {
+                if(node_ptr->isinter){
+                    node_ptr = FindNodeInVec(vec_firstpoints, firstpoints_size, node_ptr->matched_index, node_ptr->point);
+                    infirstchain = true;
                 }
             }
+            if(node_ptr->next == nullptr){
+                printf("error node_ptr never == nullptr.\n");
+                exit(-1);
+            }
+            node_ptr = node_ptr->next;
         }
-
-
 #if !debug
-            cv::Mat img(cv::Size(1200, 640), CV_8UC1, cv::Scalar(0));
+
+            printf("repolgon points size is %d.\n", (int)reinterpolygon_points.size());
+            cv::Mat img(cv::Size(1200, 600), CV_8UC1, cv::Scalar(0));
             for(int i=0; i<reinterpolygon_points.size()-1; ++i){
                 cv::line(img, cv::Point2d(50+10*reinterpolygon_points[i]->x, 550-10*reinterpolygon_points[i]->y), cv::Point2d(50+10*reinterpolygon_points[i+1]->x, 550-10*reinterpolygon_points[i+1]->y), cv::Scalar(255), 1);
+                cv::imshow("img repolygon", img);
+                cv::waitKey(0);
             }
+            cv::line(img, cv::Point2d(50+10*reinterpolygon_points[reinterpolygon_points.size()-1]->x, 550-10*reinterpolygon_points[reinterpolygon_points.size()-1]->y), cv::Point2d(50+10*reinterpolygon_points[0]->x, 550-10*reinterpolygon_points[0]->y), cv::Scalar(255), 1);
             cv::imshow("img repolygon", img);
             cv::waitKey(0);
+
 #endif
     }
 
@@ -2259,3 +2344,87 @@ namespace polygon
         }
     }
 }
+
+
+/**
+ * while (true)
+        {
+            printf("run in here.\n");
+            if(infirstchain){
+                exedgeindex_node_t<T>* curnode = &vec_firstpoints[counter_first];
+                
+                for(int i=0; i< counter_first_intersected; ++i)
+                    curnode = curnode->next;
+
+                if(reinterpolygon_points.size() >= 2){
+                    if (curnode->point->id == reinterpolygon_points[0]->id)
+                    {
+                        printf("find the same point break.\n");
+                        break;
+                    }
+                }
+                reinterpolygon_points.emplace_back(curnode->point);
+                printf("emplace pid %lld.===========================\n", curnode->point->id);
+                if(curnode->isinter){
+                    printf("in is inter first.\n");
+                    printf("counter second %d %d in is inter first.\n", counter_second, counter_second_intersected);
+                    counter_second_intersected = 2;// 直接跳到下一个交点上或者顶点上
+                    counter_second = curnode->matched_index;
+                    infirstchain = false;
+                    printf("after counter second %d %d in is inter first.\n", counter_second, counter_second_intersected);
+                }
+                else{
+                    printf("in isn't inter first.\n");
+                    printf("counter first %d %d in is inter first.\n", counter_first, counter_first_intersected);
+                    if(counter_first_intersected == 2){
+                        ++counter_first;
+                        if(counter_first == polygon_firstptr_->SizeOfExtremePoints()){
+                            counter_first = 0;
+                        }    
+                    }
+                    ++counter_first;
+                    counter_first_intersected = 0;
+                    if(counter_first == polygon_firstptr_->SizeOfExtremePoints()){
+                        counter_first = 0;
+                    }
+                    printf("after counter first %d %d in is inter first.\n", counter_first, counter_first_intersected);
+                }
+            }
+            else{
+                exedgeindex_node_t<T>* curnode = &vec_secondpoints[counter_second];
+                for(int i=0; i<counter_second_intersected; ++i){
+                    curnode = curnode->next;
+                }
+                reinterpolygon_points.emplace_back(curnode->point);
+                printf("emplace pid %lld.===========================\n", curnode->point->id);
+                if(curnode->isinter)
+                {
+                    printf("in is inter second.\n");
+                    printf("counter first %d %d in is inter second.\n", counter_first, counter_first_intersected);
+                    counter_first_intersected = 2;
+                    counter_first = curnode->matched_index;
+                    infirstchain = true;
+                    printf("after counter first %d %d in is inter second.\n", counter_first, counter_first_intersected);
+                }
+                else
+                {
+                    printf("in isn't inter second.\n");
+                    printf("counter second %d %d in is inter second.\n", counter_second, counter_second_intersected);
+                    if(counter_second_intersected == 2){
+                        ++counter_second;
+                        if(counter_second == polygon_secondptr_->SizeOfExtremePoints()){
+                            counter_second = 0;
+                        }
+                    }
+                    ++counter_second;
+                    counter_second_intersected = 0;
+                    if(counter_second == polygon_secondptr_->SizeOfExtremePoints()){
+                        counter_second = 0;
+                    }
+                    printf("after counter second %d %d in is inter second.\n", counter_second, counter_second_intersected);
+                }
+            }
+            cv::waitKey(0);
+        }
+ * 
+ * */ 

@@ -298,7 +298,6 @@ namespace polygon{
         // // head and tail link
         extreme_points_.emplace_back(accepted_points.Tail());
         extreme_edges_.emplace_back(extreme_edge_t<T>(accepted_points.Tail(), accepted_points.Top()));
-
         // PolygonPrintf("extreme_edges size is %d.\n", (int)extreme_edges_.size());
     }
 
@@ -313,11 +312,11 @@ namespace polygon{
 
     template <class T>
     point2d_t<T>* Polygon<T>::GetTempPoint(int index){
-        if(index <0 || index >= this->SizeOfExtremePoints()){
+        if(index <0 || index >= this->points_.size()){
             printf("error, index is outof bound.\n");
             exit(-1);
         }
-        return extreme_points_[index];
+        return points_[index];
     }
 
     template<class T>
@@ -325,4 +324,15 @@ namespace polygon{
         expoints.assign(extreme_points_.begin(), extreme_points_.end());
     }
 
+    template <class T>
+    bool Polygon<T>::InPolygon(point2d_t<T>* p){
+        bool inpolygon = true;
+        for(int i=0; i<extreme_edges_.size(); ++i){
+            if(!ToLeftTest_ISOL(extreme_edges_[i].p_start, extreme_edges_[i].p_end, p)){
+                inpolygon = false;
+                break;
+            }
+        }
+        return inpolygon;
+    }
 }

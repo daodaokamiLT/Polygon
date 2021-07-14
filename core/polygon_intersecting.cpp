@@ -2132,7 +2132,7 @@ namespace polygon
             }   
 
         }
-
+        
 #if debug
         // draw the link of the add intersecs polygon.
 #endif
@@ -2153,7 +2153,6 @@ namespace polygon
             ++counter_first;
             counter_first_intersected = 0;
         }
-        
         while (true)
         {
             printf("run in here.\n");
